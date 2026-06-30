@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      .report-box {
+        display: none;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        margin-top: 16px;
+        position: relative;
+        animation: fadeIn 0.4s ease;
+      }
+      .report-box.show {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .report-copy-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .report-copy-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .genai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ede9fe;
+        color: #5b21b6;
+        border: 1px solid #ddd6fe;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Interview Feedback</h1>
+          <p>Evaluate candidate performance and submit hiring recommendation</p>
+        </div>
+        <div class="dash-grid">
+          <!-- Left: Form -->
+          <div>
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Evaluation Form</div>
+                  <div class="card-subtitle">
+                    Score the candidate across key dimensions
+                  </div>
+                </div>
+              </div>
+              <form id="feedbackForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label"
+                      >Candidate <span class="req">*</span></label
+                    >
+                    <select id="candidate_id" class="form-control" required>
+                      <option value="">— Select candidate —</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label"
+                      >Recommendation <span class="req">*</span></label
+                    >
+                    <select id="recommendation" class="form-control">
+                      <option value="Strong Hire">⭐ Strong Hire</option>
+                      <option value="Hire" selected>✅ Hire</option>
+                      <option value="Maybe">🤔 Maybe</option>
+                      <option value="No Hire">❌ No Hire</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Score Sliders -->
+                <div
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 20px;
+                  "
+                >
+                  <p
+                    style="
+                      font-size: 13px;
+                      font-weight: 600;
+                      margin-bottom: 16px;
+                      color: #475569;
+                    "
+                  >
+                    SCORES (1 = Poor, 10 = Excellent)
+                  </p>
+                  <div class="score-group">
+                    <div class="score-header">
+                      <label>Technical Skills</label>
+                      <div class="score-val" id="techVal">5</div>
+                    </div>
+                    <input
+                      type="range"
+                      id="technical"
+                      min="1"
+                      max="10"
+                      value="5"
+                      oninput="
+                        document.getElementById('techVal').textContent =
+                          this.value;
+                        updateOverall();
+                      "
+                    />
+                  </div>
+                  <div class="score-group">
+                    <div class="score-header">
+                      <label>Communication</label>
+                      <div class="score-val" id="commVal">5</div>
+                    </div>
+                    <input
+                      type="range"
+                      id="communication"
+                      min="1"
+                      max="10"
+                      value="5"
+                      oninput="
+                        document.getElementById('commVal').textContent =
+                          this.value;
+                        updateOverall();
+                      "
+                    />
+                  </div>
+                  <div class="score-group">
+                    <div class="score-header">
+                      <label>Problem Solving</label>
+                      <div class="score-val" id="probVal">5</div>
+                    </div>
+                    <input
+                      type="range"
+                      id="problem_solving"
+                      min="1"
+                      max="10"
+                      value="5"
+                      oninput="
+                        document.getElementById('probVal').textContent =
+                          this.value;
+                        updateOverall();
+                      "
+                    />
+                  </div>
+                  <div
+                    style="
+                      text-align: center;
+                      margin-top: 16px;
+                      padding: 12px;
+                      background: white;
+                      border-radius: 10px;
+                      border: 1px solid #e2e8f0;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: #64748b;
+                        font-weight: 600;
+                        margin-bottom: 4px;
+                      "
+                    >
+                      OVERALL SCORE
+                    </div>
+                    <div
+                      id="overallScore"
+                      style="
+                        font-family: &quot;Syne&quot;, sans-serif;
+                        font-size: 28px;
+                        font-weight: 800;
+                        color: #4f46e5;
+                      "
+                    >
+                      5.0
+                    </div>
+                    <div style="font-size: 11px; color: #94a3b8">/ 10</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">HR Remarks</label>
+                  <textarea
+                    id="remarks"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Write detailed observations about the candidate's performance, attitude, culture fit, and any concerns..."
+                  ></textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px">
+                  <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fa fa-paper-plane"></i> Submit Feedback
+                  </button>
+                  <button type="reset" class="btn btn-outline">
+                    <i class="fa fa-times"></i> Clear
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- GenAI Report Generator -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="genai-badge">
+                    <i class="fa fa-magic"></i> Generative AI
+                  </div>
+                  <div class="card-title">Evaluation Report Generator</div>
+                  <div class="card-subtitle">
+                    Auto-generate a structured interview evaluation report
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Select Candidate</label>
+                <select id="reportCandidateId" class="form-control">
+                  <option value="">— Select candidate with feedback —</option>
+                </select>
+              </div>
+
+              <button
+                class="btn btn-primary"
+                id="generateBtn"
+                onclick="generateReport()"
+                style="background: #7c3aed; border-color: #7c3aed"
+              >
+                <i class="fa fa-file-alt"></i> Generate AI Evaluation Report
+              </button>
+
+              <!-- Report output -->
+              <div class="report-box" id="reportBox">
+                <button class="report-copy-btn" onclick="copyReport()">
+                  <i class="fa fa-copy"></i> Copy
+                </button>
+                <span id="reportText"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right panel -->
+          <div>
+            <div class="insight-card">
+              <h4>
+                <i
+                  class="fa fa-poll"
+                  style="color: #4f46e5; margin-right: 8px"
+                ></i
+                >Average Scores
+              </h4>
+              <div class="insight-row">
+                <span>Technical</span><strong id="avgTech">—</strong>
+              </div>
+              <div class="insight-row">
+                <span>Communication</span><strong id="avgComm">—</strong>
+              </div>
+              <div class="insight-row">
+                <span>Problem Solving</span><strong id="avgProb">—</strong>
+              </div>
+              <div class="insight-row">
+                <span>Overall</span><strong id="avgOverall">—</strong>
+              </div>
+            </div>
+
+            <div class="insight-card">
+              <h4>Recent Feedback</h4>
+              <div id="recentFeedback">
+                <div class="skeleton skeleton-text mb-2"></div>
+                <div class="skeleton skeleton-text mb-2"></div>
+                <div class="skeleton skeleton-text"></div>
+              </div>
+            </div>
+
+            <div
+              class="insight-card"
+              style="
+                background: linear-gradient(135deg, #4c1d95, #5b21b6);
+                color: white;
+              "
+            >
+              <h4 style="color: white">
+                <i class="fa fa-info-circle"></i> How GenAI Report Works
+              </h4>
+              <p
+                style="
+                  font-size: 13px;
+                  opacity: 0.85;
+                  line-height: 1.7;
+                  margin-top: 8px;
+                "
+              >
+                The AI reads the candidate's feedback scores, recommendation,
+                and remarks — then generates a structured evaluation report with
+                strengths, improvement areas, and a final hiring recommendation.
+              </p>
+              <p style="font-size: 12px; opacity: 0.6; margin-top: 10px">
+                No external API needed — works fully offline.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/feedback.js"></script>
+  </body>
+</html>

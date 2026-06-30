@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics — InterviewPro</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Analytics</h1>
+          <p>Data-driven insights into your hiring pipeline performance</p>
+        </div>
+
+        <!-- KPI strip -->
+        <div class="stats-grid" id="kpiGrid">
+          <div class="stat-card">
+            <div class="stat-icon indigo"><i class="fa fa-users"></i></div>
+            <div class="stat-value" id="kTotalCand">—</div>
+            <div class="stat-label">Total Candidates</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fa fa-trophy"></i></div>
+            <div class="stat-value" id="kHireRate">—</div>
+            <div class="stat-label">Hire Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber"><i class="fa fa-star"></i></div>
+            <div class="stat-value" id="kAvgScore">—</div>
+            <div class="stat-label">Avg AI Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa fa-comment-alt"></i></div>
+            <div class="stat-value" id="kAvgFeedback">—</div>
+            <div class="stat-label">Avg Feedback Score</div>
+          </div>
+        </div>
+
+        <!-- Row 1 -->
+        <div class="dash-grid" style="margin-bottom: 20px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Hiring Funnel</div>
+              <div class="card-subtitle">Candidates per stage</div>
+            </div>
+            <div class="chart-container">
+              <canvas id="funnelChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Hiring Trend</div>
+              <div class="card-subtitle">Last 6 months</div>
+            </div>
+            <div class="chart-container"><canvas id="trendChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="dash-grid-3" style="margin-bottom: 20px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Interview Rounds</div>
+            </div>
+            <div class="chart-container" style="height: 220px">
+              <canvas id="roundChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recommendations</div>
+            </div>
+            <div class="chart-container" style="height: 220px">
+              <canvas id="recoChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top Scored Candidates</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Technical</th>
+                  <th>Communication</th>
+                  <th>Problem Solving</th>
+                  <th>Overall</th>
+                  <th>Recommendation</th>
+                </tr>
+              </thead>
+              <tbody id="topTable">
+                <tr>
+                  <td colspan="6"><div class="skeleton skeleton-row"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/analytics.js"></script>
+  </body>
+</html>

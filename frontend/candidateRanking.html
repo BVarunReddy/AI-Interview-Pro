@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Candidate Ranking — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      .rank-medal {
+        font-size: 18px;
+      }
+      .score-bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 140px;
+      }
+      .score-bar {
+        flex: 1;
+        height: 6px;
+        background: var(--surface-2);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .score-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        transition: width 0.4s ease;
+      }
+      .score-val {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-primary);
+        min-width: 36px;
+        text-align: right;
+      }
+      .no-score {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-style: italic;
+      }
+      .rank-num {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text-muted);
+        min-width: 32px;
+      }
+      .rank-num.top1 {
+        color: #f59e0b;
+      }
+      .rank-num.top2 {
+        color: #94a3b8;
+      }
+      .rank-num.top3 {
+        color: #b45309;
+      }
+      .signal-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+      .signal-ai {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+      .signal-fb {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .signal-missing {
+        background: var(--surface-2);
+        color: var(--text-muted);
+      }
+      .legend-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div
+          class="page-header"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+          "
+        >
+          <div>
+            <h1>Candidate Auto-Ranking</h1>
+            <p>
+              AI-powered composite score — 50% AI Score + 50% Feedback Score
+            </p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadRanking()">
+            <i class="fa fa-rotate"></i> Refresh
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="card" style="margin-bottom: 16px; padding: 16px">
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <label class="form-label" style="margin: 0"
+              >Filter by Position:</label
+            >
+            <select
+              id="positionFilter"
+              class="form-control"
+              style="width: auto; min-width: 200px"
+              onchange="loadRanking()"
+            >
+              <option value="">All Positions</option>
+            </select>
+            <span
+              id="totalCount"
+              style="
+                font-size: 13px;
+                color: var(--text-muted);
+                margin-left: auto;
+              "
+            ></span>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend-row">
+          <span
+            ><i class="fa fa-trophy" style="color: #f59e0b"></i> = Top 3</span
+          >
+          <span class="signal-tag signal-ai"
+            ><i class="fa fa-robot"></i> AI Score</span
+          >
+          <span class="signal-tag signal-fb"
+            ><i class="fa fa-comment"></i> Feedback</span
+          >
+          <span class="signal-tag signal-missing"
+            ><i class="fa fa-minus"></i> No data</span
+          >
+          <span style="margin-left: auto; font-size: 11px"
+            >Candidates with status "Rejected" are excluded</span
+          >
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+          <div id="tableWrap">
+            <div
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--text-muted);
+              "
+            >
+              <i class="fa fa-spinner fa-spin" style="font-size: 24px"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      let positionsLoaded = false;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("candidateRanking.html", "");
+        loadRanking();
+      });
+
+      async function loadRanking() {
+        const position = document.getElementById("positionFilter").value;
+        const wrap = document.getElementById("tableWrap");
+        wrap.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>`;
+
+        const res = await API.getRanking(position);
+        if (!res || !res.ok) {
+          wrap.innerHTML = `<div style="padding:24px;color:#ef4444">Failed to load ranking.</div>`;
+          Toast.error("Failed to load ranking.");
+          return;
+        }
+
+        const { candidates, positions, total, filtered_by } = res.data;
+
+        // Populate position filter once
+        if (!positionsLoaded) {
+          const sel = document.getElementById("positionFilter");
+          const current = sel.value;
+          sel.innerHTML =
+            `<option value="">All Positions</option>` +
+            positions.map((p) => `<option value="${p}">${p}</option>`).join("");
+          sel.value = current;
+          positionsLoaded = true;
+        }
+
+        document.getElementById("totalCount").textContent =
+          `${total} candidate${total !== 1 ? "s" : ""}${filtered_by ? ` in "${filtered_by}"` : ""}`;
+
+        if (!candidates.length) {
+          wrap.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fa fa-ranking-star"></i></div>
+              <div class="empty-title">No candidates to rank</div>
+              <div class="empty-desc">Run AI scoring or submit feedback to generate rankings.</div>
+            </div>`;
+          return;
+        }
+
+        wrap.innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:48px">Rank</th>
+                <th>Candidate</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>Signals</th>
+                <th>Composite Score</th>
+              </tr>
+            </thead>
+            <tbody id="rankBody"></tbody>
+          </table>`;
+
+        const tbody = document.getElementById("rankBody");
+        tbody.innerHTML = candidates
+          .map((c) => {
+            const rankClass =
+              c.rank === 1
+                ? "top1"
+                : c.rank === 2
+                  ? "top2"
+                  : c.rank === 3
+                    ? "top3"
+                    : "";
+            const medal =
+              c.rank === 1
+                ? "🥇"
+                : c.rank === 2
+                  ? "🥈"
+                  : c.rank === 3
+                    ? "🥉"
+                    : "";
+
+            const aiTag =
+              c.ai_score !== null
+                ? `<span class="signal-tag signal-ai"><i class="fa fa-robot"></i> AI ${c.ai_score.toFixed(1)}</span>`
+                : `<span class="signal-tag signal-missing"><i class="fa fa-robot"></i> No AI score</span>`;
+
+            const fbTag =
+              c.avg_feedback !== null
+                ? `<span class="signal-tag signal-fb"><i class="fa fa-comment"></i> FB ${c.avg_feedback.toFixed(1)}</span>`
+                : `<span class="signal-tag signal-missing"><i class="fa fa-comment"></i> No feedback</span>`;
+
+            const scoreCol =
+              c.composite_score !== null
+                ? `<div class="score-bar-wrap">
+                <div class="score-bar">
+                  <div class="score-bar-fill" style="width:${c.composite_score}%"></div>
+                </div>
+                <span class="score-val">${c.composite_score}</span>
+               </div>`
+                : `<span class="no-score">No data yet</span>`;
+
+            return `<tr>
+            <td>
+              <div class="rank-num ${rankClass}">
+                ${medal || (c.rank !== null ? "#" + c.rank : "—")}
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:600">${c.name}</div>
+              <div style="font-size:12px;color:var(--text-muted)">${c.email}</div>
+            </td>
+            <td style="font-size:13px">${c.position}</td>
+            <td>${statusBadge(c.status)}</td>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;padding-top:10px">${aiTag} ${fbTag}</td>
+            <td>${scoreCol}</td>
+          </tr>`;
+          })
+          .join("");
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview Calendar — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <style>
+      .fc-toolbar h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .fc-toolbar .fc-button {
+        background: var(--brand) !important;
+        border-color: var(--brand) !important;
+        border-radius: var(--radius-sm) !important;
+        font-size: 13px !important;
+        padding: 4px 12px !important;
+      }
+      .fc-event {
+        border-radius: 4px !important;
+        font-size: 12px !important;
+        padding: 2px 6px !important;
+        cursor: pointer;
+      }
+      .fc-event.screening {
+        background: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+      }
+      .fc-event.technical {
+        background: #8b5cf6 !important;
+        border-color: #8b5cf6 !important;
+      }
+      .fc-event.hr {
+        background: #ec4899 !important;
+        border-color: #ec4899 !important;
+      }
+      .fc-event.managerial {
+        background: #10b981 !important;
+        border-color: #10b981 !important;
+      }
+      .fc-event.final {
+        background: #f59e0b !important;
+        border-color: #f59e0b !important;
+      }
+      .fc {
+        background: var(--surface);
+        padding: 20px;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border);
+      }
+      .fc-today {
+        background: var(--brand-light) !important;
+      }
+      .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .event-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      }
+      .event-modal.open {
+        display: flex;
+      }
+      .event-modal-box {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        padding: 28px;
+        min-width: 340px;
+        max-width: 420px;
+        box-shadow: var(--shadow-lg);
+      }
+      .fc-day-header {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div
+          class="page-header"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+          "
+        >
+          <div>
+            <h1>Interview Calendar</h1>
+            <p>Visual overview of all scheduled interviews</p>
+          </div>
+          <a href="scheduleInterview.html" class="btn btn-primary"
+            ><i class="fa fa-plus"></i> Schedule New</a
+          >
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #3b82f6"></div>
+            Screening
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #8b5cf6"></div>
+            Technical
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #ec4899"></div>
+            HR
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #10b981"></div>
+            Managerial
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #f59e0b"></div>
+            Final
+          </div>
+        </div>
+
+        <div id="calendar"></div>
+      </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div class="event-modal" id="eventModal">
+      <div class="event-modal-box">
+        <h3
+          id="modalTitle"
+          style="
+            font-family: &quot;Syne&quot;, sans-serif;
+            font-size: 18px;
+            margin-bottom: 16px;
+          "
+        ></h3>
+        <div id="modalBody"></div>
+        <div style="margin-top: 20px">
+          <button
+            class="btn btn-outline"
+            onclick="
+              document.getElementById('eventModal').classList.remove('open')
+            "
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("calender.html", "");
+
+        const res = await API.getInterviews();
+        if (!res || !res.ok) {
+          Toast.error("Failed to load interviews.");
+          return;
+        }
+
+        const colorMap = {
+          Screening: "screening",
+          Technical: "technical",
+          HR: "hr",
+          Managerial: "managerial",
+          Final: "final",
+        };
+
+        const events = (res.data.interviews || [])
+          .map((i) => {
+            try {
+              const rawDate = String(i.interview_date).split("T")[0];
+              const rawTime = String(i.interview_time).substring(0, 5);
+              return {
+                title: `${i.candidate_name} (${i.round_name})`,
+                start: `${rawDate}T${rawTime}:00`,
+                className: colorMap[i.round_name] || "screening",
+                candidate: i.candidate_name,
+                interviewer: i.interviewer,
+                round: i.round_name,
+                status: i.status,
+                notes: i.notes || "No notes",
+                evDate: rawDate,
+                evTime: rawTime,
+              };
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        $("#calendar").fullCalendar({
+          header: {
+            left: "prev,next today",
+            center: "title",
+            right: "month,agendaWeek,agendaDay",
+          },
+          defaultView: "month",
+          events: events,
+          eventClick: function (calEvent) {
+            document.getElementById("modalTitle").textContent =
+              `${calEvent.round} Interview`;
+            document.getElementById("modalBody").innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text-muted)">Candidate</span><strong>${calEvent.candidate}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text-muted)">Interviewer</span><strong>${calEvent.interviewer}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text-muted)">Date</span><strong>${calEvent.evDate}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text-muted)">Time</span><strong>${calEvent.evTime}</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text-muted)">Status</span>${statusBadge(calEvent.status)}
+          </div>
+          <div style="padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px;color:var(--text-secondary)">${calEvent.notes}</div>
+        </div>`;
+            document.getElementById("eventModal").classList.add("open");
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Resume Scoring — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      .ai-hero {
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e293b 50%,
+          #0f172a 100%
+        );
+        border-radius: var(--radius-xl);
+        padding: 32px;
+        color: white;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .ai-hero h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      .ai-hero p {
+        font-size: 14px;
+        opacity: 0.7;
+        max-width: 480px;
+        line-height: 1.6;
+      }
+      .ai-hero-icon {
+        font-size: 56px;
+        opacity: 0.15;
+        flex-shrink: 0;
+      }
+      .ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(79, 70, 229, 0.3);
+        border: 1px solid rgba(79, 70, 229, 0.5);
+        color: #a5b4fc;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      /* Score result card */
+      .score-result {
+        display: none;
+        animation: fadeIn 0.4s ease;
+      }
+      .score-result.show {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .score-ring-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 28px;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        border-radius: var(--radius-xl);
+        color: white;
+      }
+      .score-ring-wrap h3 {
+        font-family: "Syne", sans-serif;
+        font-size: 14px;
+        opacity: 0.6;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .ring-svg {
+        width: 160px;
+        height: 160px;
+        transform: rotate(-90deg);
+      }
+      .ring-bg {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.1);
+        stroke-width: 12;
+      }
+      .ring-fill {
+        fill: none;
+        stroke-width: 12;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .ring-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .ring-score {
+        font-family: "Syne", sans-serif;
+        font-size: 42px;
+        font-weight: 800;
+        line-height: 1;
+        color: white;
+      }
+      .ring-label {
+        font-size: 12px;
+        opacity: 0.5;
+        margin-top: 4px;
+      }
+      .ring-container {
+        position: relative;
+        width: 160px;
+        height: 160px;
+      }
+
+      .verdict {
+        margin-top: 16px;
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .verdict.strong {
+        color: #34d399;
+      }
+      .verdict.good {
+        color: #60a5fa;
+      }
+      .verdict.avg {
+        color: #fbbf24;
+      }
+      .verdict.weak {
+        color: #f87171;
+      }
+
+      /* Tag list */
+      .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .tag-green {
+        background: rgba(52, 211, 153, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .tag-red {
+        background: rgba(248, 113, 113, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.3);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* Sub-score bars */
+      .sub-score {
+        margin-bottom: 14px;
+      }
+      .sub-score-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+      .sub-score-bar {
+        height: 8px;
+        background: var(--surface-2);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .sub-score-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1s ease;
+      }
+
+      /* Thinking animation */
+      .thinking {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        text-align: center;
+      }
+      .thinking.show {
+        display: flex;
+      }
+      .thinking-dots {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .thinking-dot {
+        width: 10px;
+        height: 10px;
+        background: var(--brand);
+        border-radius: 50%;
+        animation: bounce 1.2s infinite;
+      }
+      .thinking-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .thinking-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: scale(1);
+          opacity: 0.4;
+        }
+        40% {
+          transform: scale(1.3);
+          opacity: 1;
+        }
+      }
+
+      /* History table */
+      .history-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+      .history-row:last-child {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <!-- Hero -->
+        <div class="ai-hero">
+          <div>
+            <h2>AI Resume Scoring</h2>
+            <p>
+              Paste a job description and select a candidate. Our AI engine will
+              instantly evaluate their profile, score their fit, identify
+              strengths and skill gaps, and give a hiring recommendation.
+            </p>
+          </div>
+          <div class="ai-hero-icon"><i class="fa fa-brain"></i></div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Left: Input form -->
+          <div>
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Score a Candidate</div>
+                  <div class="card-subtitle">
+                    Select candidate and paste the job description
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label"
+                  >Select Candidate <span class="req">*</span></label
+                >
+                <select id="candidateSelect" class="form-control">
+                  <option value="">— Choose a candidate —</option>
+                </select>
+              </div>
+
+              <!-- Candidate preview -->
+              <div
+                id="candidatePreview"
+                style="
+                  display: none;
+                  background: var(--surface-2);
+                  border-radius: var(--radius);
+                  padding: 14px;
+                  margin-bottom: 18px;
+                "
+              >
+                <div
+                  style="
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: 0.8px;
+                    text-transform: uppercase;
+                    color: var(--text-muted);
+                    margin-bottom: 10px;
+                  "
+                >
+                  Candidate Profile
+                </div>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                  "
+                >
+                  <div>
+                    <span style="font-size: 11px; color: var(--text-muted)"
+                      >Position</span
+                    >
+                    <div
+                      style="font-size: 13px; font-weight: 600"
+                      id="prevPosition"
+                    >
+                      —
+                    </div>
+                  </div>
+                  <div>
+                    <span style="font-size: 11px; color: var(--text-muted)"
+                      >Experience</span
+                    >
+                    <div style="font-size: 13px; font-weight: 600" id="prevExp">
+                      —
+                    </div>
+                  </div>
+                  <div style="grid-column: span 2">
+                    <span style="font-size: 11px; color: var(--text-muted)"
+                      >Skills</span
+                    >
+                    <div
+                      style="font-size: 13px; font-weight: 600"
+                      id="prevSkills"
+                    >
+                      —
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label"
+                  >Job Description <span class="req">*</span></label
+                >
+                <textarea
+                  id="jobDesc"
+                  class="form-control"
+                  rows="10"
+                  placeholder="Paste the full job description here...
+
+Example:
+We are looking for a Senior Frontend Developer with:
+- 3+ years of React.js experience
+- Strong knowledge of JavaScript, HTML5, CSS3
+- Experience with REST APIs and state management (Redux)
+- Familiarity with Git and agile workflows
+- Good communication and team collaboration skills"
+                ></textarea>
+              </div>
+
+              <button
+                class="btn btn-primary w-full"
+                id="scoreBtn"
+                style="height: 46px; font-size: 15px"
+                onclick="runAIScore()"
+              >
+                <i class="fa fa-robot"></i> Run AI Score
+              </button>
+            </div>
+
+            <!-- Scored history -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Recently Scored</div>
+              </div>
+              <div id="scoredHistory">
+                <div class="empty-state" style="padding: 24px">
+                  <div class="empty-icon"><i class="fa fa-history"></i></div>
+                  <div class="empty-desc">No candidates scored yet</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Result panel -->
+          <div>
+            <!-- Thinking state -->
+            <div class="card thinking" id="thinkingPanel">
+              <div class="thinking-dots">
+                <div class="thinking-dot"></div>
+                <div class="thinking-dot"></div>
+                <div class="thinking-dot"></div>
+              </div>
+              <div style="font-weight: 600; margin-bottom: 6px">
+                Claude is analyzing the profile...
+              </div>
+              <div style="font-size: 13px; color: var(--text-muted)">
+                Evaluating skills, experience, and job fit
+              </div>
+            </div>
+
+            <!-- Result -->
+            <div class="score-result" id="scoreResult">
+              <!-- Score ring -->
+              <div class="score-ring-wrap" style="margin-bottom: 16px">
+                <h3>Match Score</h3>
+                <div class="ring-container">
+                  <svg class="ring-svg" viewBox="0 0 160 160">
+                    <circle class="ring-bg" cx="80" cy="80" r="64" />
+                    <circle
+                      class="ring-fill"
+                      id="ringFill"
+                      cx="80"
+                      cy="80"
+                      r="64"
+                      stroke-dasharray="402"
+                      stroke-dashoffset="402"
+                      stroke="#4f46e5"
+                    />
+                  </svg>
+                  <div class="ring-center">
+                    <div class="ring-score" id="ringScore">0</div>
+                    <div class="ring-label">/ 100</div>
+                  </div>
+                </div>
+                <div class="verdict" id="verdict"></div>
+              </div>
+
+              <!-- Summary -->
+              <div class="card" style="margin-bottom: 16px">
+                <div class="card-title" style="margin-bottom: 10px">
+                  AI Summary
+                </div>
+                <p
+                  id="aiSummary"
+                  style="
+                    font-size: 14px;
+                    color: var(--text-secondary);
+                    line-height: 1.7;
+                  "
+                ></p>
+              </div>
+
+              <!-- Strengths & Gaps -->
+              <div class="card" style="margin-bottom: 16px">
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                  "
+                >
+                  <div>
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 700;
+                        margin-bottom: 10px;
+                        color: var(--success);
+                      "
+                    >
+                      <i class="fa fa-check-circle"></i> Strengths
+                    </div>
+                    <div class="tag-list" id="strengthsList"></div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-size: 13px;
+                        font-weight: 700;
+                        margin-bottom: 10px;
+                        color: var(--danger);
+                      "
+                    >
+                      <i class="fa fa-times-circle"></i> Skill Gaps
+                    </div>
+                    <div class="tag-list" id="gapsList"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Score breakdown -->
+              <div class="card">
+                <div class="card-title" style="margin-bottom: 16px">
+                  Score Breakdown
+                </div>
+                <div id="scoreBreakdown"></div>
+                <hr class="divider" />
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  "
+                >
+                  <span style="font-size: 13px; font-weight: 600"
+                    >Candidate</span
+                  >
+                  <span
+                    style="font-size: 13px; color: var(--text-muted)"
+                    id="resultCandName"
+                  ></span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 8px;
+                  "
+                >
+                  <span style="font-size: 13px; font-weight: 600"
+                    >Score saved to profile</span
+                  >
+                  <span class="badge badge-selected"
+                    ><i class="fa fa-check"></i> Yes</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div
+              class="card"
+              id="emptyResult"
+              style="text-align: center; padding: 48px 24px"
+            >
+              <div style="font-size: 48px; margin-bottom: 16px">🤖</div>
+              <div
+                style="font-weight: 700; font-size: 16px; margin-bottom: 8px"
+              >
+                Ready to Score
+              </div>
+              <div style="font-size: 13px; color: var(--text-muted)">
+                Select a candidate and paste a job description, then click Run
+                AI Score
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/aiScore.js"></script>
+  </body>
+</html>

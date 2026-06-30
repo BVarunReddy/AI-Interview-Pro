@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interviews — InterviewPro</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div
+          class="page-header"
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          "
+        >
+          <div>
+            <h1>Interviews</h1>
+            <p>View and manage all scheduled interview sessions</p>
+          </div>
+          <a href="scheduleInterview.html" class="btn btn-primary"
+            ><i class="fa fa-plus"></i> Schedule New</a
+          >
+        </div>
+
+        <div class="filter-row">
+          <div class="search-wrap">
+            <i class="fa fa-search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search candidate or interviewer..."
+            />
+          </div>
+          <select
+            id="roundFilter"
+            class="form-control"
+            style="width: 160px; height: 42px"
+          >
+            <option value="All">All Rounds</option>
+            <option>Screening</option>
+            <option>Technical</option>
+            <option>HR</option>
+            <option>Managerial</option>
+            <option>Final</option>
+          </select>
+          <select
+            id="statusFilter"
+            class="form-control"
+            style="width: 160px; height: 42px"
+          >
+            <option value="All">All Status</option>
+            <option>Scheduled</option>
+            <option>Completed</option>
+            <option>Cancelled</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Round</th>
+                  <th>Interviewer</th>
+                  <th>Date & Time</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="interviewTable">
+                <tr>
+                  <td colspan="6"><div class="skeleton skeleton-row"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/viewInterviews.js"></script>
+  </body>
+</html>

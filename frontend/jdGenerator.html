@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JD Generator — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      .ai-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        border-radius: var(--radius-xl);
+        padding: 32px;
+        color: white;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .ai-hero h2 { font-family: "Syne", sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+      .ai-hero p { font-size: 14px; opacity: 0.7; max-width: 480px; line-height: 1.6; }
+      .ai-hero-icon { font-size: 56px; opacity: 0.15; flex-shrink: 0; }
+      .ai-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(79,70,229,.3); border: 1px solid rgba(79,70,229,.5);
+        color: #a5b4fc; padding: 4px 12px; border-radius: 999px;
+        font-size: 12px; font-weight: 600; margin-bottom: 12px;
+      }
+      .output-box {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        font-size: 14px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        min-height: 200px;
+        color: var(--text-primary);
+        font-family: inherit;
+      }
+      .output-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+      .typing { display: inline-block; }
+      .typing::after { content: "▋"; animation: blink .8s infinite; }
+      @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+
+        <div class="ai-hero">
+          <div>
+            <div class="ai-badge"><i class="fa fa-wand-magic-sparkles"></i> Powered by Groq AI</div>
+            <h2>Job Description Generator</h2>
+            <p>Generate professional, bias-free job descriptions in seconds. Fill in the role details and let AI do the writing.</p>
+          </div>
+          <div class="ai-hero-icon"><i class="fa fa-file-pen"></i></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start">
+
+          <!-- Input Panel -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Role Details</div></div>
+            <div class="form-group">
+              <label class="form-label">Position Title <span style="color:#ef4444">*</span></label>
+              <input type="text" id="position" class="form-control" placeholder="e.g. Senior Frontend Developer" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <input type="text" id="department" class="form-control" placeholder="e.g. Engineering" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Experience Required (years)</label>
+              <input type="number" id="experience" class="form-control" placeholder="e.g. 3" min="0" max="30" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Key Skills / Technologies</label>
+              <input type="text" id="skills" class="form-control" placeholder="e.g. React, TypeScript, Node.js" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tone</label>
+              <select id="tone" class="form-control">
+                <option value="Professional">Professional</option>
+                <option value="Friendly and Inclusive">Friendly &amp; Inclusive</option>
+                <option value="Startup / Energetic">Startup / Energetic</option>
+                <option value="Formal / Corporate">Formal / Corporate</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="generateBtn" onclick="generateJD()" data-roles="admin,hr" style="width:100%">
+              <i class="fa fa-wand-magic-sparkles"></i> Generate JD
+            </button>
+          </div>
+
+          <!-- Output Panel -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Generated Job Description</div>
+            </div>
+            <div id="outputBox" class="output-box" style="color:var(--text-muted);font-style:italic">
+Your job description will appear here...
+            </div>
+            <div class="output-actions" id="outputActions" style="display:none!important">
+              <button class="btn btn-outline btn-sm" onclick="copyJD()">
+                <i class="fa fa-copy"></i> Copy
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="downloadJD()">
+                <i class="fa fa-download"></i> Download .txt
+              </button>
+              <button class="btn btn-outline btn-sm" onclick="clearOutput()">
+                <i class="fa fa-rotate-left"></i> Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("jdGenerator.html", "");
+        initPageAccess();
+      });
+
+      async function generateJD() {
+        const position = document.getElementById("position").value.trim();
+        if (!position) { Toast.error("Position title is required."); return; }
+
+        const btn = document.getElementById("generateBtn");
+        const box = document.getElementById("outputBox");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating...';
+        box.style.fontStyle = "normal";
+        box.style.color = "var(--text-primary)";
+        box.innerHTML = '<span class="typing">Generating your job description</span>';
+        document.getElementById("outputActions").style.setProperty("display", "none", "important");
+
+        const res = await API.post("/ai/generate-jd", {
+          position,
+          department: document.getElementById("department").value.trim(),
+          experience: document.getElementById("experience").value,
+          skills: document.getElementById("skills").value.trim(),
+          tone: document.getElementById("tone").value,
+        });
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-wand-magic-sparkles"></i> Generate JD';
+
+        if (res && res.ok && res.data.jd) {
+          box.textContent = res.data.jd;
+          document.getElementById("outputActions").style.removeProperty("display");
+        } else {
+          box.style.color = "#ef4444";
+          box.textContent = res?.data?.message || "Generation failed. Check your GROQ_API_KEY in .env and restart the server.";
+        }
+      }
+
+      function copyJD() {
+        const text = document.getElementById("outputBox").textContent;
+        navigator.clipboard.writeText(text).then(() => Toast.success("Copied to clipboard!"));
+      }
+
+      function downloadJD() {
+        const text = document.getElementById("outputBox").textContent;
+        const pos = document.getElementById("position").value || "job-description";
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+        a.download = `${pos.replace(/\s+/g, "-").toLowerCase()}-jd.txt`;
+        a.click();
+      }
+
+      function clearOutput() {
+        const box = document.getElementById("outputBox");
+        box.textContent = "Your job description will appear here...";
+        box.style.color = "var(--text-muted)";
+        box.style.fontStyle = "italic";
+        document.getElementById("outputActions").style.setProperty("display", "none", "important");
+      }
+    </script>
+  </body>
+</html>

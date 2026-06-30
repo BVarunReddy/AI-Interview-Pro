@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register — InterviewPro</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body {
+        margin: 0;
+      }
+      .auth-wrap {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .auth-left {
+        background: linear-gradient(
+          145deg,
+          #0f172a 0%,
+          #1e293b 60%,
+          #334155 100%
+        );
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+      .auth-brand {
+        font-family: "Syne", sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 48px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .auth-brand-dot {
+        width: 10px;
+        height: 10px;
+        background: #4f46e5;
+        border-radius: 50%;
+      }
+      .auth-left h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 38px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 16px;
+      }
+      .auth-left p {
+        font-size: 15px;
+        opacity: 0.7;
+        max-width: 360px;
+        line-height: 1.7;
+      }
+      .step-list {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 14px;
+        opacity: 0.85;
+      }
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #4f46e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .auth-right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 60px;
+        background: #fff;
+      }
+      .auth-box {
+        width: 100%;
+        max-width: 420px;
+      }
+      .auth-box h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .auth-box .sub {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 28px;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input-wrap i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 13px;
+      }
+      .input-wrap .form-control {
+        padding-left: 38px;
+      }
+      .btn-full {
+        width: 100%;
+        height: 44px;
+        font-size: 14px;
+        margin-top: 4px;
+      }
+      .auth-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 13px;
+        color: #64748b;
+      }
+      .auth-footer a {
+        color: #4f46e5;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      @media (max-width: 768px) {
+        .auth-left {
+          display: none;
+        }
+        .auth-wrap {
+          grid-template-columns: 1fr;
+        }
+        .auth-right {
+          padding: 32px 24px;
+        }
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-wrap">
+      <div class="auth-left">
+        <div class="auth-brand">
+          <div class="auth-brand-dot"></div>
+          InterviewPro
+        </div>
+        <h1>Start hiring<br />the right way.</h1>
+        <p>
+          Create your account and get access to AI-powered candidate management,
+          smart scheduling, and data-driven hiring decisions.
+        </p>
+        <div class="step-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            Create your account
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            Add your first candidates
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            Schedule interviews & collect feedback
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            Let AI score and rank applicants
+          </div>
+        </div>
+      </div>
+      <div class="auth-right">
+        <div class="auth-box">
+          <h2>Create Account</h2>
+          <p class="sub">Join InterviewPro and streamline your hiring</p>
+          <form id="registerForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <div class="input-wrap">
+                  <i class="fa fa-user"></i>
+                  <input
+                    type="text"
+                    id="name"
+                    class="form-control"
+                    placeholder="John Smith"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <div class="input-wrap">
+                  <i class="fa fa-building"></i>
+                  <input
+                    type="text"
+                    id="department"
+                    class="form-control"
+                    placeholder="HR & Recruitment"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <div class="input-wrap">
+                <i class="fa fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  placeholder="you@company.com"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-wrap">
+                  <i class="fa fa-lock"></i>
+                  <input
+                    type="password"
+                    id="password"
+                    class="form-control"
+                    placeholder="Min 6 characters"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <div class="input-wrap">
+                  <i class="fa fa-id-badge"></i>
+                  <select
+                    id="role"
+                    class="form-control"
+                    style="padding-left: 38px"
+                  >
+                    <option value="hr">HR Manager</option>
+                    <option value="interviewer">Interviewer</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="regBtn">
+              <i class="fa fa-user-plus"></i> Create Account
+            </button>
+          </form>
+          <div class="auth-footer">
+            Already have an account? <a href="login.html">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      if (Auth.isLoggedIn()) window.location.href = "dashboard.html";
+
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("regBtn");
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating...';
+          btn.disabled = true;
+
+          const res = await API.register({
+            name: document.getElementById("name").value.trim(),
+            email: document.getElementById("email").value.trim(),
+            password: document.getElementById("password").value,
+            role: document.getElementById("role").value,
+            department: document.getElementById("department").value.trim(),
+          });
+
+          if (res && res.ok) {
+            Toast.success("Account created! Redirecting to login...");
+            setTimeout(() => (window.location.href = "login.html"), 1200);
+          } else {
+            Toast.error(res?.data?.message || "Registration failed.");
+            btn.innerHTML = '<i class="fa fa-user-plus"></i> Create Account';
+            btn.disabled = false;
+          }
+        });
+    </script>
+  </body>
+</html>

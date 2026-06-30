@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulk Import — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      .import-hero {
+        background: linear-gradient(135deg, #065f46, #047857);
+        border-radius: var(--radius-xl);
+        padding: 28px 32px;
+        color: white;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .import-hero h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .import-hero p {
+        font-size: 13px;
+        opacity: 0.8;
+        max-width: 500px;
+      }
+      .import-hero-icon {
+        font-size: 52px;
+        opacity: 0.15;
+      }
+      .step-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+      .step-num {
+        width: 32px;
+        height: 32px;
+        background: var(--brand);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .step-content h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .step-content p {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+      .preview-table-wrap {
+        overflow-x: auto;
+        max-height: 360px;
+        overflow-y: auto;
+      }
+      .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      .preview-table th {
+        background: var(--brand);
+        color: white;
+        padding: 10px 12px;
+        text-align: left;
+        position: sticky;
+        top: 0;
+      }
+      .preview-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .preview-table tr:hover td {
+        background: var(--surface-2);
+      }
+      .row-valid td {
+        background: #f0fdf4;
+      }
+      .row-invalid td {
+        background: #fff1f2;
+      }
+      .badge-valid {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .badge-invalid {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .progress-bar-wrap {
+        background: var(--surface-2);
+        border-radius: 999px;
+        height: 12px;
+        overflow: hidden;
+        margin: 12px 0;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--brand);
+        border-radius: 999px;
+        transition: width 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="import-hero">
+          <div>
+            <h2>Bulk Import Candidates</h2>
+            <p>
+              Upload an Excel or CSV file to add multiple candidates at once.
+              Download the template, fill it in, and upload.
+            </p>
+          </div>
+          <div class="import-hero-icon"><i class="fa fa-file-excel"></i></div>
+        </div>
+
+        <div class="dash-grid">
+          <div>
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <h4>Download Template</h4>
+                <p>Download the Excel template with correct column headers</p>
+                <button
+                  class="btn btn-outline"
+                  style="margin-top: 10px"
+                  onclick="downloadTemplate()"
+                >
+                  <i class="fa fa-download"></i> Download Template
+                </button>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <h4>Fill in Candidates</h4>
+                <p>
+                  Fill the template with candidate details. Required: name,
+                  email, position
+                </p>
+              </div>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <h4>Upload File</h4>
+                <p>Upload your filled Excel or CSV file below</p>
+                <div
+                  class="file-drop"
+                  style="margin-top: 12px"
+                  id="fileDrop"
+                  onclick="document.getElementById('excelFile').click()"
+                >
+                  <i class="fa fa-cloud-upload-alt"></i>
+                  <p><strong>Click to upload</strong> or drag and drop</p>
+                  <p style="font-size: 12px; margin-top: 4px">
+                    .xlsx, .xls, .csv — max 5MB
+                  </p>
+                  <p
+                    id="fileName"
+                    style="
+                      font-size: 13px;
+                      color: #4f46e5;
+                      margin-top: 8px;
+                      font-weight: 600;
+                    "
+                  ></p>
+                </div>
+                <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" />
+              </div>
+            </div>
+
+            <div id="statsRow" style="display: none; margin-top: 16px">
+              <div class="card">
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 16px;
+                    text-align: center;
+                  "
+                >
+                  <div>
+                    <div
+                      style="
+                        font-family: &quot;Syne&quot;, sans-serif;
+                        font-size: 28px;
+                        font-weight: 800;
+                        color: #4f46e5;
+                      "
+                      id="statTotal"
+                    >
+                      0
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted)">
+                      Total Rows
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-family: &quot;Syne&quot;, sans-serif;
+                        font-size: 28px;
+                        font-weight: 800;
+                        color: #10b981;
+                      "
+                      id="statValid"
+                    >
+                      0
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted)">
+                      Valid
+                    </div>
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-family: &quot;Syne&quot;, sans-serif;
+                        font-size: 28px;
+                        font-weight: 800;
+                        color: #ef4444;
+                      "
+                      id="statInvalid"
+                    >
+                      0
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-muted)">
+                      Invalid
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="importBtnWrap" style="display: none; margin-top: 16px">
+              <button
+                class="btn btn-primary w-full"
+                style="height: 46px; font-size: 15px"
+                id="importBtn"
+                onclick="importCandidates()"
+              >
+                <i class="fa fa-upload"></i> Import Valid Candidates
+              </button>
+            </div>
+
+            <div id="progressWrap" style="display: none; margin-top: 16px">
+              <div class="card">
+                <div
+                  style="font-size: 13px; font-weight: 600; margin-bottom: 8px"
+                >
+                  Importing... <span id="progressText">0/0</span>
+                </div>
+                <div class="progress-bar-wrap">
+                  <div
+                    class="progress-bar-fill"
+                    id="progressBar"
+                    style="width: 0%"
+                  ></div>
+                </div>
+                <div
+                  id="importLog"
+                  style="
+                    max-height: 150px;
+                    overflow-y: auto;
+                    font-size: 12px;
+                    color: var(--text-muted);
+                    margin-top: 8px;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Preview</div>
+                <div
+                  id="previewCount"
+                  style="font-size: 13px; color: var(--text-muted)"
+                >
+                  No file selected
+                </div>
+              </div>
+              <div id="previewEmpty" style="text-align: center; padding: 40px">
+                <div style="font-size: 40px; margin-bottom: 12px">📊</div>
+                <div style="font-weight: 600; margin-bottom: 6px">
+                  No file uploaded yet
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  Upload an Excel file to preview candidates
+                </div>
+              </div>
+              <div id="previewTableWrap" style="display: none">
+                <div class="preview-table-wrap">
+                  <table class="preview-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Position</th>
+                        <th>Exp</th>
+                        <th>Skills</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="previewBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-card" style="margin-top: 16px">
+              <h4>Required Columns</h4>
+              <div class="insight-row">
+                <span style="color: #ef4444; font-weight: 700">name *</span
+                ><span style="font-size: 12px">Full name</span>
+              </div>
+              <div class="insight-row">
+                <span style="color: #ef4444; font-weight: 700">email *</span
+                ><span style="font-size: 12px">Unique email address</span>
+              </div>
+              <div class="insight-row">
+                <span style="color: #ef4444; font-weight: 700">position *</span
+                ><span style="font-size: 12px">Job position</span>
+              </div>
+              <div class="insight-row">
+                <span>phone</span><span style="font-size: 12px">Optional</span>
+              </div>
+              <div class="insight-row">
+                <span>experience</span
+                ><span style="font-size: 12px">Years (number)</span>
+              </div>
+              <div class="insight-row">
+                <span>skills</span
+                ><span style="font-size: 12px">Comma separated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      let parsedData = [];
+
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("bulkImport.html", "");
+
+        const fileInput = document.getElementById("excelFile");
+        const drop = document.getElementById("fileDrop");
+        fileInput.addEventListener("change", () =>
+          handleFile(fileInput.files[0]),
+        );
+        drop.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          drop.classList.add("drag");
+        });
+        drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+        drop.addEventListener("drop", (e) => {
+          e.preventDefault();
+          drop.classList.remove("drag");
+          handleFile(e.dataTransfer.files[0]);
+        });
+      });
+
+      function downloadTemplate() {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([
+          ["name", "email", "phone", "position", "experience", "skills"],
+          [
+            "John Smith",
+            "john@email.com",
+            "+91 9876543210",
+            "Frontend Developer",
+            "3",
+            "React, JavaScript, CSS",
+          ],
+          [
+            "Priya Sharma",
+            "priya@email.com",
+            "+91 9876543211",
+            "Backend Developer",
+            "2",
+            "Node.js, MySQL, Express",
+          ],
+          [
+            "Rahul Kumar",
+            "rahul@email.com",
+            "+91 9876543212",
+            "Full Stack Developer",
+            "4",
+            "React, Node.js, MongoDB",
+          ],
+        ]);
+        ws["!cols"] = [
+          { wch: 20 },
+          { wch: 25 },
+          { wch: 16 },
+          { wch: 22 },
+          { wch: 12 },
+          { wch: 35 },
+        ];
+        XLSX.utils.book_append_sheet(wb, ws, "Candidates");
+        XLSX.writeFile(wb, "InterviewPro_Candidate_Template.xlsx");
+        Toast.success("Template downloaded!");
+      }
+
+      function handleFile(file) {
+        if (!file) return;
+        const ext = "." + file.name.split(".").pop().toLowerCase();
+        if (![".xlsx", ".xls", ".csv"].includes(ext)) {
+          Toast.error("Please upload Excel or CSV file.");
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          Toast.error("File too large. Max 5MB.");
+          return;
+        }
+        document.getElementById("fileName").textContent = `📎 ${file.name}`;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const wb = XLSX.read(e.target.result, { type: "binary" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+          parseAndPreview(rows);
+        };
+        reader.readAsBinaryString(file);
+      }
+
+      function parseAndPreview(rows) {
+        parsedData = [];
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const seenEmails = new Set();
+
+        rows.forEach((row) => {
+          const name = String(row.name || row.Name || "").trim();
+          const email = String(row.email || row.Email || "")
+            .trim()
+            .toLowerCase();
+          const position = String(row.position || row.Position || "").trim();
+          const phone = String(row.phone || row.Phone || "").trim();
+          const exp = parseInt(row.experience || row.Experience || 0) || 0;
+          const skills = String(row.skills || row.Skills || "").trim();
+          const errors = [];
+          if (!name) errors.push("Name required");
+          if (!email) errors.push("Email required");
+          else if (!emailRegex.test(email)) errors.push("Invalid email");
+          else if (seenEmails.has(email)) errors.push("Duplicate email");
+          if (!position) errors.push("Position required");
+          if (email) seenEmails.add(email);
+          parsedData.push({
+            name,
+            email,
+            position,
+            phone,
+            experience: exp,
+            skills,
+            valid: errors.length === 0,
+            errors,
+          });
+        });
+
+        const valid = parsedData.filter((r) => r.valid).length;
+        const invalid = parsedData.length - valid;
+        document.getElementById("statTotal").textContent = parsedData.length;
+        document.getElementById("statValid").textContent = valid;
+        document.getElementById("statInvalid").textContent = invalid;
+        document.getElementById("statsRow").style.display = "block";
+        document.getElementById("importBtnWrap").style.display =
+          valid > 0 ? "block" : "none";
+        document.getElementById("previewEmpty").style.display = "none";
+        document.getElementById("previewTableWrap").style.display = "block";
+        document.getElementById("previewCount").textContent =
+          `${parsedData.length} rows found`;
+
+        document.getElementById("previewBody").innerHTML = parsedData
+          .map(
+            (r, i) => `
+    <tr class="${r.valid ? "row-valid" : "row-invalid"}">
+      <td>${i + 1}</td>
+      <td>${r.name || "—"}</td>
+      <td style="font-size:12px">${r.email || "—"}</td>
+      <td>${r.position || "—"}</td>
+      <td>${r.experience}y</td>
+      <td style="font-size:12px">${r.skills ? r.skills.substring(0, 25) + (r.skills.length > 25 ? "..." : "") : "—"}</td>
+      <td>${r.valid ? '<span class="badge-valid">✓ Valid</span>' : `<span class="badge-invalid">✗ ${r.errors[0]}</span>`}</td>
+    </tr>`,
+          )
+          .join("");
+
+        Toast.info(
+          `${parsedData.length} rows parsed — ${valid} valid, ${invalid} invalid`,
+        );
+      }
+
+      async function importCandidates() {
+        const validRows = parsedData.filter((r) => r.valid);
+        if (!validRows.length) {
+          Toast.warning("No valid candidates to import.");
+          return;
+        }
+        document.getElementById("importBtn").disabled = true;
+        document.getElementById("progressWrap").style.display = "block";
+        const log = document.getElementById("importLog");
+        let success = 0,
+          failed = 0;
+
+        for (let i = 0; i < validRows.length; i++) {
+          const c = validRows[i];
+          const pct = Math.round(((i + 1) / validRows.length) * 100);
+          document.getElementById("progressBar").style.width = pct + "%";
+          document.getElementById("progressText").textContent =
+            `${i + 1}/${validRows.length}`;
+          const fd = new FormData();
+          fd.append("name", c.name);
+          fd.append("email", c.email);
+          fd.append("phone", c.phone || "");
+          fd.append("position", c.position);
+          fd.append("experience", c.experience);
+          fd.append("skills", c.skills);
+          const res = await API.addCandidate(fd);
+          if (res && res.ok) {
+            success++;
+            log.innerHTML += `<div style="color:#10b981">✓ ${c.name} imported</div>`;
+          } else {
+            failed++;
+            log.innerHTML += `<div style="color:#ef4444">✗ ${c.name} — ${res?.data?.message || "failed"}</div>`;
+          }
+          log.scrollTop = log.scrollHeight;
+          await new Promise((r) => setTimeout(r, 150));
+        }
+        document.getElementById("importBtn").disabled = false;
+        Toast.success(
+          `Import complete! ${success} imported, ${failed} failed.`,
+        );
+      }
+    </script>
+  </body>
+</html>

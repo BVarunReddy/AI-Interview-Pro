@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Candidate — InterviewPro</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Add Candidate</h1>
+          <p>Create a new candidate profile in the hiring pipeline</p>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Form -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Candidate Information</div>
+                <div class="card-subtitle">
+                  Fill in the applicant's details below
+                </div>
+              </div>
+            </div>
+            <form id="candidateForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label"
+                    >Full Name <span class="req">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="name"
+                    class="form-control"
+                    placeholder="e.g. Rahul Sharma"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label"
+                    >Email Address <span class="req">*</span></label
+                  >
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    placeholder="rahul@email.com"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    class="form-control"
+                    placeholder="+91 9876543210"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label"
+                    >Applying For <span class="req">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="position"
+                    class="form-control"
+                    placeholder="e.g. Frontend Developer"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Years of Experience</label>
+                  <input
+                    type="number"
+                    id="experience"
+                    class="form-control"
+                    placeholder="0"
+                    min="0"
+                    max="50"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Initial Status</label>
+                  <select id="status" class="form-control">
+                    <option value="Pending">Pending</option>
+                    <option value="Screening">Screening</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Skills / Technologies</label>
+                <input
+                  type="text"
+                  id="skills"
+                  class="form-control"
+                  placeholder="e.g. React, Node.js, MySQL, Python"
+                />
+              </div>
+
+              <!-- Resume Upload -->
+              <div class="form-group">
+                <label class="form-label">Resume / CV</label>
+                <div
+                  class="file-drop"
+                  id="fileDrop"
+                  onclick="document.getElementById('resumeFile').click()"
+                >
+                  <i class="fa fa-cloud-upload-alt"></i>
+                  <p><strong>Click to upload</strong> or drag and drop</p>
+                  <p style="font-size: 12px; margin-top: 4px">
+                    PDF, DOC, DOCX — max 5MB
+                  </p>
+                  <p
+                    id="fileName"
+                    style="
+                      font-size: 13px;
+                      color: #4f46e5;
+                      margin-top: 8px;
+                      font-weight: 600;
+                    "
+                  ></p>
+                </div>
+                <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" />
+              </div>
+
+              <div style="display: flex; gap: 12px; margin-top: 8px">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                  <i class="fa fa-user-plus"></i> Add Candidate
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  onclick="
+                    document.getElementById('candidateForm').reset();
+                    document.getElementById('fileName').textContent = '';
+                  "
+                >
+                  <i class="fa fa-times"></i> Clear
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Right panel -->
+          <div>
+            <div class="insight-card">
+              <h4>
+                <i
+                  class="fa fa-info-circle"
+                  style="color: #4f46e5; margin-right: 8px"
+                ></i
+                >Tips
+              </h4>
+              <div class="insight-row">
+                <span>Add full name as on resume</span>
+              </div>
+              <div class="insight-row">
+                <span>Use a unique email per candidate</span>
+              </div>
+              <div class="insight-row">
+                <span>Comma-separate skills for AI scoring</span>
+              </div>
+              <div class="insight-row">
+                <span>Upload resume to enable AI scoring</span>
+              </div>
+            </div>
+            <div class="insight-card">
+              <h4>
+                <i
+                  class="fa fa-robot"
+                  style="color: #4f46e5; margin-right: 8px"
+                ></i
+                >AI Resume Scoring
+              </h4>
+              <p style="font-size: 13px; color: #475569; line-height: 1.6">
+                After adding a candidate, go to AI Scoring page to automatically
+                evaluate their fit against a job description using our built-in
+                AI engine.
+              </p>
+            </div>
+            <div class="insight-card">
+              <h4>Pipeline Stages</h4>
+              <div class="insight-row">
+                <span class="badge badge-pending">Pending</span
+                ><span style="font-size: 12px; color: #64748b"
+                  >Initial application</span
+                >
+              </div>
+              <div class="insight-row">
+                <span class="badge badge-screening">Screening</span
+                ><span style="font-size: 12px; color: #64748b"
+                  >First review</span
+                >
+              </div>
+              <div class="insight-row">
+                <span class="badge badge-interview">Interview</span
+                ><span style="font-size: 12px; color: #64748b"
+                  >Active interviews</span
+                >
+              </div>
+              <div class="insight-row">
+                <span class="badge badge-offer">Offer</span
+                ><span style="font-size: 12px; color: #64748b"
+                  >Offer extended</span
+                >
+              </div>
+              <div class="insight-row">
+                <span class="badge badge-selected">Selected</span
+                ><span style="font-size: 12px; color: #64748b">Hired</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/candidate.js"></script>
+  </body>
+</html>

@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — InterviewPro</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body {
+        margin: 0;
+      }
+      .auth-wrap {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .auth-left {
+        background: linear-gradient(
+          145deg,
+          #4f46e5 0%,
+          #7c3aed 60%,
+          #06b6d4 100%
+        );
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+      .auth-left::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
+      .auth-left-content {
+        position: relative;
+        z-index: 1;
+      }
+      .auth-brand {
+        font-family: "Syne", sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 48px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .auth-brand-dot {
+        width: 10px;
+        height: 10px;
+        background: #06b6d4;
+        border-radius: 50%;
+      }
+      .auth-left h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 16px;
+      }
+      .auth-left p {
+        font-size: 16px;
+        opacity: 0.8;
+        max-width: 360px;
+        line-height: 1.7;
+      }
+      .auth-features {
+        margin-top: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .auth-feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        opacity: 0.9;
+      }
+      .auth-feature-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .auth-right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px;
+        background: #fff;
+      }
+      .auth-box {
+        width: 100%;
+        max-width: 400px;
+      }
+      .auth-box h2 {
+        font-family: "Syne", sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 6px;
+      }
+      .auth-box .sub {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 36px;
+      }
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 7px;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input-wrap i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 14px;
+      }
+      .input-wrap .form-control {
+        padding-left: 40px;
+      }
+      .input-wrap .eye-btn {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn-full {
+        width: 100%;
+        height: 46px;
+        font-size: 15px;
+        border-radius: 10px;
+        margin-top: 6px;
+      }
+      .auth-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 13px;
+        color: #64748b;
+      }
+      .auth-footer a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .demo-info {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 24px;
+        font-size: 13px;
+      }
+      .demo-info strong {
+        color: #4f46e5;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .demo-info span {
+        color: #475569;
+      }
+      @media (max-width: 768px) {
+        .auth-left {
+          display: none;
+        }
+        .auth-wrap {
+          grid-template-columns: 1fr;
+        }
+        .auth-right {
+          padding: 32px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-wrap">
+      <!-- Left Panel -->
+      <div class="auth-left">
+        <div class="auth-left-content">
+          <div class="auth-brand">
+            <div class="auth-brand-dot"></div>
+            InterviewPro
+          </div>
+          <h1>Hire smarter,<br />not harder.</h1>
+          <p>
+            A modern Applicant Tracking System with AI-powered resume scoring,
+            pipeline management, and interview analytics.
+          </p>
+          <div class="auth-features">
+            <div class="auth-feature">
+              <div class="auth-feature-icon"><i class="fa fa-robot"></i></div>
+              AI-powered resume scoring & candidate matching
+            </div>
+            <div class="auth-feature">
+              <div class="auth-feature-icon">
+                <i class="fa fa-chart-line"></i>
+              </div>
+              Real-time analytics and hiring pipeline insights
+            </div>
+            <div class="auth-feature">
+              <div class="auth-feature-icon">
+                <i class="fa fa-calendar-alt"></i>
+              </div>
+              Smart interview scheduling and feedback tracking
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="auth-right">
+        <div class="auth-box">
+          <h2>Welcome back</h2>
+          <p class="sub">Sign in to your InterviewPro account</p>
+
+          <form id="loginForm">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <div class="input-wrap">
+                <i class="fa fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  class="form-control"
+                  placeholder="you@company.com"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <div class="input-wrap">
+                <i class="fa fa-lock"></i>
+                <input
+                  type="password"
+                  id="password"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  required
+                />
+                <button type="button" class="eye-btn" id="eyeBtn">
+                  <i class="fa fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary btn-full"
+              id="loginBtn"
+            >
+              <i class="fa fa-sign-in-alt"></i> Sign In
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            Don't have an account? <a href="register.html">Create one</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      // Redirect if already logged in
+      if (Auth.isLoggedIn()) window.location.href = "dashboard.html";
+
+      // Toggle password visibility
+      document.getElementById("eyeBtn").addEventListener("click", function () {
+        const p = document.getElementById("password");
+        const icon = this.querySelector("i");
+        if (p.type === "password") {
+          p.type = "text";
+          icon.className = "fa fa-eye-slash";
+        } else {
+          p.type = "password";
+          icon.className = "fa fa-eye";
+        }
+      });
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("loginBtn");
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Signing in...';
+          btn.disabled = true;
+
+          const res = await API.login({
+            email: document.getElementById("email").value.trim(),
+            password: document.getElementById("password").value,
+          });
+
+          if (res && res.ok) {
+            Auth.setSession(res.data.token, res.data.user);
+            Toast.success("Login successful! Redirecting...");
+            setTimeout(() => (window.location.href = "dashboard.html"), 800);
+          } else {
+            Toast.error(res?.data?.message || "Login failed.");
+            btn.innerHTML = '<i class="fa fa-sign-in-alt"></i> Sign In';
+            btn.disabled = false;
+          }
+        });
+    </script>
+  </body>
+</html>

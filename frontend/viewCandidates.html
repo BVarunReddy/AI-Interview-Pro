@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Candidates — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div
+          class="page-header"
+          style="
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+          "
+        >
+          <div>
+            <h1>Candidates</h1>
+            <p>Manage and track all applicants through the hiring pipeline</p>
+          </div>
+          <div style="display: flex; gap: 10px">
+            <button class="btn btn-outline" onclick="exportCandidatesExcel()">
+              <i class="fa fa-file-excel"></i> Export CSV
+            </button>
+            <button class="btn btn-outline" onclick="exportCandidatesPDF()">
+              <i class="fa fa-file-pdf"></i> Export PDF
+            </button>
+            <a href="addCandidate.html" class="btn btn-primary" data-roles="admin,hr"
+              ><i class="fa fa-plus"></i> Add Candidate</a
+            >
+          </div>
+        </div>
+
+        <!-- Pipeline stages -->
+        <div class="pipeline" id="pipeline">
+          <div
+            class="pipeline-stage active"
+            data-status="All"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-all">—</div>
+            <div class="pipeline-name">All</div>
+          </div>
+          <div
+            class="pipeline-stage"
+            data-status="Pending"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-pending">—</div>
+            <div class="pipeline-name">Pending</div>
+          </div>
+          <div
+            class="pipeline-stage"
+            data-status="Screening"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-screening">—</div>
+            <div class="pipeline-name">Screening</div>
+          </div>
+          <div
+            class="pipeline-stage"
+            data-status="Interview"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-interview">—</div>
+            <div class="pipeline-name">Interview</div>
+          </div>
+          <div
+            class="pipeline-stage"
+            data-status="Offer"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-offer">—</div>
+            <div class="pipeline-name">Offer</div>
+          </div>
+          <div
+            class="pipeline-stage"
+            data-status="Selected"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-selected">—</div>
+            <div class="pipeline-name">Selected</div>
+          </div>
+          <div
+            class="pipeline-stage"
+            data-status="Rejected"
+            onclick="filterByStage(this)"
+          >
+            <div class="pipeline-count" id="cnt-rejected">—</div>
+            <div class="pipeline-name">Rejected</div>
+          </div>
+        </div>
+
+        <div class="filter-row" style="flex-wrap: wrap; gap: 10px">
+          <div class="search-wrap">
+            <i class="fa fa-search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search by name, email, position..."
+            />
+          </div>
+          <select id="positionFilter" class="form-control" style="width:auto">
+            <option value="">All Positions</option>
+          </select>
+          <select id="expFilter" class="form-control" style="width:auto">
+            <option value="">Any Experience</option>
+            <option value="0-1">0–1 yrs</option>
+            <option value="2-4">2–4 yrs</option>
+            <option value="5-9">5–9 yrs</option>
+            <option value="10-99">10+ yrs</option>
+          </select>
+          <input type="date" id="dateFrom" class="form-control" style="width:auto" title="Added from" />
+          <input type="date" id="dateTo" class="form-control" style="width:auto" title="Added to" />
+          <button class="btn btn-outline btn-sm" onclick="clearAdvancedFilters()">
+            <i class="fa fa-rotate-left"></i> Reset
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Position</th>
+                  <th>Experience</th>
+                  <th>AI Score</th>
+                  <th>Status</th>
+                  <th>Added</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="candidateTable">
+                <tr>
+                  <td colspan="7"><div class="skeleton skeleton-row"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div
+      id="statusModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: var(--surface);
+          border-radius: 16px;
+          padding: 28px;
+          min-width: 320px;
+          box-shadow: var(--shadow-lg);
+        "
+      >
+        <h3
+          style="margin-bottom: 16px; font-family: &quot;Syne&quot;, sans-serif"
+        >
+          Update Status
+        </h3>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px">
+          Candidate: <strong id="modalCandName"></strong>
+        </p>
+        <select
+          id="modalStatus"
+          class="form-control"
+          style="margin-bottom: 20px"
+        >
+          <option>Pending</option>
+          <option>Screening</option>
+          <option>Interview</option>
+          <option>Offer</option>
+          <option>Selected</option>
+          <option>Rejected</option>
+        </select>
+        <div style="display: flex; gap: 10px">
+          <button class="btn btn-primary" onclick="confirmStatusUpdate()" data-roles="admin,hr">
+            Update
+          </button>
+          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/viewCandidates.js"></script>
+  </body>
+</html>

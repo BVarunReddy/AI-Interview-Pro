@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apply — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body.public-page {
+        background: var(--bg, #f8fafc);
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 40px 16px;
+      }
+      .apply-wrap {
+        width: 100%;
+        max-width: 640px;
+      }
+      .apply-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .apply-header h1 {
+        font-family: "Syne", sans-serif;
+        margin-bottom: 6px;
+      }
+      .apply-header p {
+        color: #64748b;
+        font-size: 14px;
+      }
+      .req {
+        color: #ef4444;
+      }
+      #applySuccess {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+      }
+      #applySuccess i {
+        font-size: 48px;
+        color: #10b981;
+        margin-bottom: 16px;
+      }
+    </style>
+  </head>
+  <body class="public-page">
+    <div class="apply-wrap">
+      <div class="apply-header">
+        <h1>Apply for a Position</h1>
+        <p>Submit your details and we'll review your application shortly</p>
+      </div>
+
+      <div class="card" id="applyCard">
+        <form id="applyForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label"
+                >Full Name <span class="req">*</span></label
+              >
+              <input
+                type="text"
+                id="name"
+                class="form-control"
+                placeholder="e.g. Rahul Sharma"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Email Address <span class="req">*</span></label
+              >
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                placeholder="rahul@email.com"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input
+                type="text"
+                id="phone"
+                class="form-control"
+                placeholder="+91 9876543210"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Position <span class="req">*</span></label
+              >
+              <input
+                type="text"
+                id="position"
+                class="form-control"
+                placeholder="e.g. Frontend Developer"
+                list="positionList"
+                required
+              />
+              <datalist id="positionList"></datalist>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Years of Experience</label>
+              <input
+                type="number"
+                id="experience"
+                class="form-control"
+                placeholder="0"
+                min="0"
+                max="50"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Skills / Technologies</label>
+            <input
+              type="text"
+              id="skills"
+              class="form-control"
+              placeholder="e.g. React, Node.js, MySQL, Python"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Resume / CV</label>
+            <div
+              class="file-drop"
+              id="fileDrop"
+              onclick="document.getElementById('resumeFile').click()"
+            >
+              <i class="fa fa-cloud-upload-alt"></i>
+              <p><strong>Click to upload</strong> or drag and drop</p>
+              <p style="font-size: 12px; margin-top: 4px">
+                PDF, DOC, DOCX — max 5MB
+              </p>
+              <p
+                id="fileName"
+                style="
+                  font-size: 13px;
+                  color: #4f46e5;
+                  margin-top: 8px;
+                  font-weight: 600;
+                "
+              ></p>
+            </div>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" />
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="submitBtn"
+            style="width: 100%; margin-top: 8px"
+          >
+            <i class="fa fa-paper-plane"></i> Submit Application
+          </button>
+        </form>
+
+        <div id="applySuccess">
+          <i class="fa fa-circle-check"></i>
+          <h3
+            style="
+              font-family: &quot;Syne&quot;, sans-serif;
+              margin-bottom: 8px;
+            "
+          >
+            Application Submitted!
+          </h3>
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 20px">
+            Thank you for applying. We'll review your application and reach out
+            by email if you're shortlisted.
+          </p>
+          <a href="portalSignup.html" class="btn btn-primary">
+            <i class="fa fa-user-plus"></i> Create a Portal Account to Track
+            Status
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:3000/api";
+
+      // Populate position suggestions from existing open roles
+      fetch(`${API_BASE}/public/positions`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!d.success) return;
+          const list = document.getElementById("positionList");
+          list.innerHTML = d.positions
+            .map((p) => `<option value="${p}"></option>`)
+            .join("");
+        })
+        .catch(() => {});
+
+      const drop = document.getElementById("fileDrop");
+      const fileInput = document.getElementById("resumeFile");
+      const fileNameEl = document.getElementById("fileName");
+
+      function updateFileLabel() {
+        const file = fileInput.files[0];
+        fileNameEl.textContent = file ? `📎 ${file.name}` : "";
+      }
+      fileInput.addEventListener("change", updateFileLabel);
+      drop.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        drop.classList.add("drag");
+      });
+      drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+      drop.addEventListener("drop", (e) => {
+        e.preventDefault();
+        drop.classList.remove("drag");
+        fileInput.files = e.dataTransfer.files;
+        updateFileLabel();
+      });
+
+      function showError(msg) {
+        let el = document.getElementById("applyError");
+        if (!el) {
+          el = document.createElement("div");
+          el.id = "applyError";
+          el.style.cssText =
+            "background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px";
+          document
+            .getElementById("applyForm")
+            .insertBefore(el, document.getElementById("applyForm").firstChild);
+        }
+        el.textContent = msg;
+      }
+
+      document
+        .getElementById("applyForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("submitBtn");
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting...';
+
+          const fd = new FormData();
+          fd.append("name", document.getElementById("name").value.trim());
+          fd.append("email", document.getElementById("email").value.trim());
+          fd.append("phone", document.getElementById("phone").value.trim());
+          fd.append(
+            "position",
+            document.getElementById("position").value.trim(),
+          );
+          fd.append(
+            "experience",
+            document.getElementById("experience").value || 0,
+          );
+          fd.append("skills", document.getElementById("skills").value.trim());
+          if (fileInput.files[0]) fd.append("resume", fileInput.files[0]);
+
+          try {
+            const res = await fetch(`${API_BASE}/public/apply`, {
+              method: "POST",
+              body: fd,
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              document.getElementById("applyForm").style.display = "none";
+              document.getElementById("applySuccess").style.display = "block";
+            } else {
+              showError(data.message || "Submission failed. Please try again.");
+              btn.disabled = false;
+              btn.innerHTML =
+                '<i class="fa fa-paper-plane"></i> Submit Application';
+            }
+          } catch (err) {
+            showError(
+              "Network error. Please check your connection and try again.",
+            );
+            btn.disabled = false;
+            btn.innerHTML =
+              '<i class="fa fa-paper-plane"></i> Submit Application';
+          }
+        });
+    </script>
+  </body>
+</html>

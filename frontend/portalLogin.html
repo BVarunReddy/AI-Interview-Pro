@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Login — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body.public-page {
+        background: var(--bg, #f8fafc);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .portal-wrap {
+        width: 100%;
+        max-width: 420px;
+      }
+      .portal-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .portal-header h1 {
+        font-family: "Syne", sans-serif;
+        margin-bottom: 6px;
+      }
+      .portal-header p {
+        color: #64748b;
+        font-size: 14px;
+      }
+      .portal-footer-link {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 13px;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body class="public-page">
+    <div class="portal-wrap">
+      <div class="portal-header">
+        <h1>Candidate Portal</h1>
+        <p>Log in to track your application</p>
+      </div>
+
+      <div class="card">
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              placeholder="you@email.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="Your password"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="submitBtn"
+            style="width: 100%; margin-top: 8px"
+          >
+            <i class="fa fa-right-to-bracket"></i> Log In
+          </button>
+        </form>
+      </div>
+
+      <div class="portal-footer-link">
+        Don't have a portal account yet?
+        <a href="portalSignup.html" style="color: #4f46e5">Create one</a>
+        &nbsp;·&nbsp;
+        <a href="apply.html" style="color: #4f46e5">Apply for a job</a>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:3000/api";
+
+      function showMsg(msg) {
+        let el = document.getElementById("formMsg");
+        if (!el) {
+          el = document.createElement("div");
+          el.id = "formMsg";
+          el.style.cssText =
+            "background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px";
+          document
+            .getElementById("loginForm")
+            .insertBefore(el, document.getElementById("loginForm").firstChild);
+        }
+        el.textContent = msg;
+      }
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("password").value;
+
+          const btn = document.getElementById("submitBtn");
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Logging in...';
+
+          try {
+            const res = await fetch(`${API_BASE}/portal/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              localStorage.setItem("portalToken", data.token);
+              localStorage.setItem("portalEmail", data.email);
+              window.location.href = "portalDashboard.html";
+            } else {
+              showMsg(data.message || "Login failed.");
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Log In';
+            }
+          } catch (err) {
+            showMsg("Network error. Please try again.");
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Log In';
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Portal Account — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body.public-page {
+        background: var(--bg, #f8fafc);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .portal-wrap {
+        width: 100%;
+        max-width: 420px;
+      }
+      .portal-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .portal-header h1 {
+        font-family: "Syne", sans-serif;
+        margin-bottom: 6px;
+      }
+      .portal-header p {
+        color: #64748b;
+        font-size: 14px;
+      }
+      .portal-footer-link {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 13px;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body class="public-page">
+    <div class="portal-wrap">
+      <div class="portal-header">
+        <h1>Create Your Portal Account</h1>
+        <p>Track your application status and manage interviews</p>
+      </div>
+
+      <div class="card">
+        <form id="createAccountForm">
+          <div class="form-group">
+            <label class="form-label"
+              >Email Address <span style="color: #ef4444">*</span></label
+            >
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              placeholder="Use the same email you applied with"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label"
+              >Password <span style="color: #ef4444">*</span></label
+            >
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              placeholder="At least 6 characters"
+              minlength="6"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              class="form-control"
+              placeholder="Re-enter password"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="submitBtn"
+            style="width: 100%; margin-top: 8px"
+          >
+            <i class="fa fa-user-plus"></i> Create Account
+          </button>
+        </form>
+      </div>
+
+      <div class="portal-footer-link">
+        Already have an account?
+        <a href="portalLogin.html" style="color: #4f46e5">Log in</a>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:3000/api";
+
+      function showMsg(msg, isError) {
+        let el = document.getElementById("formMsg");
+        if (!el) {
+          el = document.createElement("div");
+          el.id = "formMsg";
+          el.style.cssText =
+            "padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px";
+          document
+            .getElementById("createAccountForm")
+            .insertBefore(
+              el,
+              document.getElementById("createAccountForm").firstChild,
+            );
+        }
+        el.style.background = isError ? "#fee2e2" : "#d1fae5";
+        el.style.color = isError ? "#991b1b" : "#065f46";
+        el.textContent = msg;
+      }
+
+      document
+        .getElementById("createAccountForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("password").value;
+          const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+          if (password !== confirmPassword) {
+            showMsg("Passwords don't match.", true);
+            return;
+          }
+
+          const btn = document.getElementById("submitBtn");
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Creating...';
+
+          try {
+            const res = await fetch(`${API_BASE}/portal/account/create`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              showMsg("Account created! Redirecting to login...", false);
+              setTimeout(
+                () => (window.location.href = "portalLogin.html"),
+                1500,
+              );
+            } else {
+              showMsg(data.message || "Could not create account.", true);
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa fa-user-plus"></i> Create Account';
+            }
+          } catch (err) {
+            showMsg("Network error. Please try again.", true);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-user-plus"></i> Create Account';
+          }
+        });
+    </script>
+  </body>
+</html>

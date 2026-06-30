@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offer Letter — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+      .offer-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 20px; align-items: start; }
+      @media (max-width: 900px) { .offer-grid { grid-template-columns: 1fr; } }
+      .letter-preview { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 40px; font-family: Georgia, serif; color: #1e293b; line-height: 1.7; font-size: 14px; min-height: 500px; }
+      .letter-preview a { color: inherit !important; text-decoration: none !important; }
+      .letter-header { text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 16px; margin-bottom: 24px; }
+      .letter-company { font-size: 22px; font-weight: 700; color: #4f46e5; letter-spacing: 1px; }
+      .letter-title { font-size: 16px; letter-spacing: 3px; font-weight: 600; text-align: center; margin: 16px 0; color: #0f172a; text-transform: uppercase; }
+      .letter-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+      .letter-table td { padding: 10px 12px; border: 1px solid #e2e8f0; color: #1e293b !important; }
+      .letter-table tr:nth-child(odd) td { background: #f8fafc; }
+      .letter-table .label { font-weight: 600; width: 40%; }
+      .letter-sig { margin-top: 48px; page-break-inside: avoid; }
+      .letter-expiry { font-size: 13px; color: #64748b; margin-bottom: 12px; font-style: italic; }
+      .placeholder { color: #94a3b8; font-style: italic; }
+      .offer-history-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 8px; font-size: 13px; }
+      .sent-badge { background: #d1fae5; color: #047857; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+      .gen-badge  { background: #dbeafe; color: #1d4ed8; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+      @media print {
+        @page { margin: 1.5cm; size: A4; }
+        .sidebar, .main > .navbar, .no-print { display: none !important; }
+        .main { margin-left: 0 !important; }
+        .page-content { padding: 0 !important; }
+        .offer-grid { grid-template-columns: 1fr !important; }
+        .letter-preview { border: none !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; }
+        .letter-table td { color: #1e293b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .letter-table tr:nth-child(odd) td { background: #f8fafc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body { background: white !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="page-header" style="margin-bottom:20px">
+          <h1>Offer Letter</h1>
+          <p>Generate and send offer letters to selected candidates</p>
+        </div>
+
+        <div class="offer-grid">
+          <div>
+            <div class="card no-print">
+              <div class="card-header"><div class="card-title">Offer Details</div></div>
+
+              <div class="form-group">
+                <label class="form-label">Candidate <span style="color:#ef4444">*</span></label>
+                <select id="candidate_id" class="form-control" onchange="onCandidateChange()">
+                  <option value="">Select a candidate...</option>
+                </select>
+                <div style="font-size:12px;color:#64748b;margin-top:4px">Only shows candidates with status Offer or Selected</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Position <span style="color:#ef4444">*</span></label>
+                <input type="text" id="position" class="form-control" placeholder="e.g. Senior Frontend Developer" oninput="updatePreview()" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input type="text" id="department" class="form-control" placeholder="e.g. Engineering" oninput="updatePreview()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Annual CTC (&#8377;) <span style="color:#ef4444">*</span></label>
+                  <input type="text" id="salary" class="form-control" placeholder="e.g. 12,00,000" oninput="updatePreview()" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Date of Joining <span style="color:#ef4444">*</span></label>
+                  <input type="date" id="joining_date" class="form-control" oninput="updatePreview()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Offer Expiry Date</label>
+                  <input type="date" id="expiry_date" class="form-control" oninput="updatePreview()" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Company Name <span style="color:#ef4444">*</span></label>
+                  <input type="text" id="company_name" class="form-control" placeholder="Your Company Pvt. Ltd." oninput="updatePreview()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">HR Manager Name <span style="color:#ef4444">*</span></label>
+                  <input type="text" id="hr_name" class="form-control" placeholder="e.g. Priya Sharma" oninput="updatePreview()" />
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="saveAndEmail()" id="emailBtn" data-roles="admin,hr">
+                  <i class="fa fa-paper-plane"></i> Save &amp; Email Candidate
+                </button>
+                <button class="btn btn-outline" onclick="saveOnly()" id="saveBtn" data-roles="admin,hr">
+                  <i class="fa fa-floppy-disk"></i> Save Only
+                </button>
+                <button class="btn btn-outline" onclick="printLetter()" data-roles="admin,hr">
+                  <i class="fa fa-print"></i> Print
+                </button>
+              </div>
+
+              <div id="formMsg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+            </div>
+
+            <div class="card no-print" id="historyCard" style="display:none;margin-top:16px">
+              <div class="card-header"><div class="card-title">Previous Offers</div></div>
+              <div id="historyList"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px" class="no-print">
+              <div style="font-size:13px;font-weight:600;color:var(--text-muted)">LIVE PREVIEW</div>
+              <button class="btn btn-outline btn-sm" onclick="printLetter()"><i class="fa fa-print"></i> Print</button>
+            </div>
+            <div class="letter-preview" id="letterPreview">
+              <div style="text-align:center;color:#94a3b8;padding:60px 0">
+                <i class="fa fa-file-lines" style="font-size:48px;display:block;margin-bottom:12px;opacity:.3"></i>
+                Fill in the details on the left to preview the offer letter
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      let candidates = [];
+      const user = Auth.getUser() || {};
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("offerletter.html", "");
+        initPageAccess();
+        document.getElementById("hr_name").value = user.name || "";
+        const joining = new Date();
+        joining.setDate(joining.getDate() + 30);
+        document.getElementById("joining_date").value = joining.toISOString().split("T")[0];
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 7);
+        document.getElementById("expiry_date").value = expiry.toISOString().split("T")[0];
+        await loadCandidates();
+        updatePreview();
+      });
+
+      async function loadCandidates() {
+        const res = await API.getCandidates({ limit: 200 });
+        if (!res || !res.ok) return;
+        candidates = (res.data.candidates || []).filter(
+          (c) => c.status === "Selected" || c.status === "Offer"
+        );
+        const sel = document.getElementById("candidate_id");
+        sel.innerHTML = "<option value=''>Select a candidate...</option>" +
+          candidates.map((c) => "<option value='" + c.id + "'>" + c.name + " \u2014 " + c.position + " (" + c.status + ")</option>").join("");
+      }
+
+      async function onCandidateChange() {
+        const id = document.getElementById("candidate_id").value;
+        if (!id) { document.getElementById("historyCard").style.display = "none"; updatePreview(); return; }
+        const c = candidates.find((x) => x.id == id);
+        if (c) { document.getElementById("position").value = c.position || ""; updatePreview(); }
+        const res = await API.getCandidateOffers(id);
+        const historyCard = document.getElementById("historyCard");
+        const historyList = document.getElementById("historyList");
+        if (res && res.ok && res.data.offers.length) {
+          historyCard.style.display = "block";
+          historyList.innerHTML = res.data.offers.map((o) =>
+            "<div class='offer-history-item'>" +
+            "<i class='fa fa-file-contract' style='color:#4f46e5;font-size:18px'></i>" +
+            "<div style='flex:1'>" +
+            "<div style='font-weight:600'>" + o.position + "</div>" +
+            "<div style='color:var(--text-muted)'>&#8377;" + o.salary + " &middot; Joining " + formatDate(o.joining_date) + "</div>" +
+            "<div style='color:var(--text-muted);font-size:11px'>By " + (o.created_by_name || "HR") + " &middot; " + timeAgo(o.created_at) + "</div>" +
+            "</div>" +
+            "<span class='" + (o.status === "Sent" ? "sent-badge" : "gen-badge") + "'>" + o.status + "</span>" +
+            "</div>"
+          ).join("");
+        } else {
+          historyCard.style.display = "none";
+        }
+      }
+
+      function getCandidateName() {
+        const id = document.getElementById("candidate_id").value;
+        const c = candidates.find((x) => x.id == id);
+        return c ? c.name : null;
+      }
+
+      function v(id) { return document.getElementById(id) ? document.getElementById(id).value.trim() : ""; }
+
+      function formatDate(d) {
+        if (!d) return "";
+        return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+      }
+
+      function timeAgo(d) {
+        const s = (Date.now() - new Date(d)) / 1000;
+        if (s < 3600) return Math.floor(s / 60) + "m ago";
+        if (s < 86400) return Math.floor(s / 3600) + "h ago";
+        return Math.floor(s / 86400) + "d ago";
+      }
+
+      function ph(text, fallback) {
+        return text || "<span class='placeholder'>[" + fallback + "]</span>";
+      }
+
+      function updatePreview() {
+        const name     = getCandidateName();
+        const position = v("position");
+        const dept     = v("department");
+        const salary   = v("salary");
+        const joining  = v("joining_date");
+        const expiry   = v("expiry_date");
+        const company  = v("company_name");
+        const hr       = v("hr_name");
+        const today    = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+
+        if (!name && !position && !company) {
+          document.getElementById("letterPreview").innerHTML =
+            "<div style='text-align:center;color:#94a3b8;padding:60px 0'>" +
+            "<i class='fa fa-file-lines' style='font-size:48px;display:block;margin-bottom:12px;opacity:.3'></i>" +
+            "Fill in the details on the left to preview the offer letter</div>";
+          return;
+        }
+
+        var html = "";
+        html += "<div class='letter-header'>";
+        html += "<div class='letter-company'>" + ph(company, "Company Name") + "</div>";
+        html += "<div style='font-size:12px;color:#64748b;margin-top:4px'>HR Department</div>";
+        html += "</div>";
+        html += "<div class='letter-title'>Offer Letter</div>";
+        html += "<p style='color:#1e293b'>Date: <strong>" + today + "</strong></p>";
+        if (expiry) html += "<p class='letter-expiry'>This offer is valid until <strong>" + formatDate(expiry) + "</strong>. Please respond before this date.</p>";
+        html += "<p style='color:#1e293b'>Dear <strong>" + ph(name, "Candidate Name") + "</strong>,</p>";
+        html += "<p style='color:#1e293b'>We are pleased to offer you the position of <strong>" + ph(position, "Position") + "</strong>";
+        if (dept) html += " in the <strong>" + dept + "</strong> department";
+        html += " at <strong>" + ph(company, "Company Name") + "</strong>, subject to the terms and conditions outlined below.</p>";
+        html += "<div class='letter-title' style='font-size:13px;margin:20px 0 8px'>Offer Details</div>";
+        html += "<table class='letter-table'>";
+        html += "<tr><td class='label' style='color:#1e293b'>Position</td><td style='color:#1e293b'>" + ph(position, "Position") + "</td></tr>";
+        if (dept) html += "<tr><td class='label' style='color:#1e293b'>Department</td><td style='color:#1e293b'>" + dept + "</td></tr>";
+        html += "<tr><td class='label' style='color:#1e293b'>Annual CTC</td><td style='color:#1e293b'><strong>&#8377;" + ph(salary, "Salary") + "</strong></td></tr>";
+        html += "<tr><td class='label' style='color:#1e293b'>Date of Joining</td><td style='color:#1e293b'><strong>" + (joining ? formatDate(joining) : "<span class='placeholder'>[Joining Date]</span>") + "</strong></td></tr>";
+        html += "<tr><td class='label' style='color:#1e293b'>Employment Type</td><td style='color:#1e293b'>Full-Time, Permanent</td></tr>";
+        html += "<tr><td class='label' style='color:#1e293b'>Work Location</td><td style='color:#1e293b'>As discussed during the interview process</td></tr>";
+        html += "</table>";
+        html += "<p style='color:#1e293b'>This offer is conditional upon successful completion of background verification and submission of required documents before your joining date.</p>";
+        html += "<p style='color:#1e293b'>Please confirm your acceptance of this offer by replying to this email or contacting the HR department";
+        if (expiry) html += " before <strong>" + formatDate(expiry) + "</strong>";
+        html += ".</p>";
+        html += "<p style='color:#1e293b'>We look forward to welcoming you to our team. Congratulations!</p>";
+        html += "<div class='letter-sig'>";
+        html += "<p style='color:#1e293b'>Yours sincerely,</p>";
+        html += "<br><br>";
+        html += "<div style='border-top:1px solid #1e293b;padding-top:10px;display:inline-block;min-width:200px'>";
+        html += "<strong style='color:#1e293b;font-size:15px'>" + ph(hr, "HR Manager Name") + "</strong><br>";
+        html += "<span style='font-size:12px;color:#475569'>HR Manager</span><br>";
+        html += "<span style='font-size:12px;color:#475569'>" + ph(company, "Company Name") + "</span>";
+        html += "</div></div>";
+
+        document.getElementById("letterPreview").innerHTML = html;
+      }
+
+      function showMsg(msg, isError) {
+        const el = document.getElementById("formMsg");
+        el.style.display = "block";
+        el.style.background = isError ? "#fee2e2" : "#d1fae5";
+        el.style.color = isError ? "#991b1b" : "#065f46";
+        el.innerHTML = "<i class='fa " + (isError ? "fa-circle-xmark" : "fa-circle-check") + "'></i> " + msg;
+      }
+
+      function getFormData(sendEmail) {
+        return {
+          candidate_id: v("candidate_id") || null,
+          position:     v("position"),
+          department:   v("department"),
+          salary:       v("salary"),
+          joining_date: v("joining_date"),
+          company_name: v("company_name"),
+          hr_name:      v("hr_name"),
+          send_email:   sendEmail,
+        };
+      }
+
+      function validate() {
+        var required = { candidate_id: "Candidate", position: "Position", salary: "Annual CTC", joining_date: "Date of Joining", company_name: "Company Name", hr_name: "HR Manager Name" };
+        for (var id in required) {
+          if (!v(id)) { Toast.error(required[id] + " is required."); return false; }
+        }
+        return true;
+      }
+
+      async function saveAndEmail() {
+        if (!validate()) return;
+        var btn = document.getElementById("emailBtn");
+        btn.disabled = true;
+        btn.innerHTML = "<i class='fa fa-spinner fa-spin'></i> Sending...";
+        var res = await API.saveOffer(getFormData(true));
+        btn.disabled = false;
+        btn.innerHTML = "<i class='fa fa-paper-plane'></i> Save & Email Candidate";
+        if (res && res.ok) { showMsg(res.data.message, false); Toast.success(res.data.message); onCandidateChange(); }
+        else { showMsg((res && res.data && res.data.message) || "Failed to send.", true); }
+      }
+
+      async function saveOnly() {
+        if (!validate()) return;
+        var btn = document.getElementById("saveBtn");
+        btn.disabled = true;
+        btn.innerHTML = "<i class='fa fa-spinner fa-spin'></i> Saving...";
+        var res = await API.saveOffer(getFormData(false));
+        btn.disabled = false;
+        btn.innerHTML = "<i class='fa fa-floppy-disk'></i> Save Only";
+        if (res && res.ok) { showMsg(res.data.message, false); Toast.success("Offer letter saved."); onCandidateChange(); }
+        else { showMsg((res && res.data && res.data.message) || "Failed to save.", true); }
+      }
+
+      function printLetter() {
+        var preview = document.getElementById("letterPreview");
+        if (!preview || preview.innerHTML.indexOf("Fill in the details") !== -1) {
+          Toast.error("Please fill in the offer details first.");
+          return;
+        }
+
+        var styles =
+          "@page{margin:1.8cm;size:A4}" +
+          "*{box-sizing:border-box;margin:0;padding:0}" +
+          "body{font-family:Georgia,serif;color:#1e293b;font-size:14px;line-height:1.7;background:white}" +
+          "p{margin-bottom:10px;color:#1e293b}" +
+          "strong{color:#1e293b}" +
+          ".letter-header{text-align:center;border-bottom:2px solid #4f46e5;padding-bottom:16px;margin-bottom:24px}" +
+          ".letter-company{font-size:22px;font-weight:700;color:#4f46e5;letter-spacing:1px}" +
+          ".letter-title{font-size:15px;letter-spacing:3px;font-weight:600;text-align:center;margin:20px 0 12px;color:#1e293b;text-transform:uppercase}" +
+          ".letter-expiry{font-size:13px;color:#64748b;margin-bottom:12px;font-style:italic}" +
+          "table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}" +
+          "td{padding:10px 12px;border:1px solid #cbd5e1;color:#1e293b}" +
+          "tr:nth-child(odd) td{background:#f8fafc}" +
+          ".label{font-weight:600;width:40%;color:#1e293b}" +
+          ".letter-sig{margin-top:48px;page-break-inside:avoid}" +
+          ".placeholder{color:#94a3b8;font-style:italic}";
+
+        // Split tag name across strings so VS Code HTML parser does not misread it
+        var TAG = "scr" + "ipt";
+        var scriptRe = new RegExp("<" + TAG + "[\\s\\S]*?<\\/" + TAG + ">", "gi");
+        var clean = preview.innerHTML
+          .replace(scriptRe, "")
+          .replace(/<!--[\s\S]*?-->/g, "")
+          .trim();
+
+        var fullHtml =
+          "<!DOCTYPE html><html><head><meta charset='UTF-8'>" +
+          "<title>Offer Letter</title>" +
+          "<style>" + styles + "</style>" +
+          "</head><body>" + clean + "</body></html>";
+
+        var blob = new Blob([fullHtml], { type: "text/html" });
+        var url  = URL.createObjectURL(blob);
+        var win  = window.open(url, "_blank");
+        if (win) {
+          win.onload = function() {
+            setTimeout(function() { win.print(); URL.revokeObjectURL(url); }, 300);
+          };
+        } else {
+          URL.revokeObjectURL(url);
+          Toast.error("Pop-up blocked. Please allow pop-ups for this site and try again.");
+        }
+      }
+    </script>
+  </body>
+</html>

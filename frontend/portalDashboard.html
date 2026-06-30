@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Application — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      body.public-page {
+        background: var(--bg, #f8fafc);
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
+      .portal-shell {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+      .portal-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .portal-topbar h1 {
+        font-family: "Syne", sans-serif;
+        font-size: 22px;
+      }
+      .status-hero {
+        text-align: center;
+        padding: 28px 20px;
+      }
+      .status-hero .badge {
+        font-size: 14px;
+        padding: 8px 18px;
+      }
+      .interview-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      .interview-item .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .reschedule-box {
+        display: none;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body class="public-page">
+    <div class="portal-shell">
+      <div class="portal-topbar">
+        <h1>My Application</h1>
+        <button class="btn btn-outline btn-sm" onclick="logout()">
+          <i class="fa fa-right-from-bracket"></i> Log Out
+        </button>
+      </div>
+
+      <div
+        id="loadingState"
+        class="card"
+        style="text-align: center; padding: 40px"
+      >
+        <i
+          class="fa fa-spinner fa-spin"
+          style="font-size: 24px; color: #4f46e5"
+        ></i>
+      </div>
+
+      <div id="dashboardContent" style="display: none">
+        <div class="card status-hero">
+          <p style="color: #64748b; font-size: 13px; margin-bottom: 6px">
+            Applying for
+          </p>
+          <h2
+            id="positionName"
+            style="
+              font-family: &quot;Syne&quot;, sans-serif;
+              margin-bottom: 14px;
+            "
+          ></h2>
+          <span id="statusBadge" class="badge"></span>
+        </div>
+
+        <div class="card" style="margin-top: 18px">
+          <div class="card-header">
+            <div class="card-title">Your Interviews</div>
+          </div>
+          <div id="interviewList"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:3000/api";
+      const token = localStorage.getItem("portalToken");
+
+      if (!token) {
+        window.location.href = "portalLogin.html";
+      }
+
+      function logout() {
+        localStorage.removeItem("portalToken");
+        localStorage.removeItem("portalEmail");
+        window.location.href = "portalLogin.html";
+      }
+
+      function statusBadgeClass(status) {
+        const map = {
+          Pending: "badge-pending",
+          Screening: "badge-screening",
+          Interview: "badge-interview",
+          Offer: "badge-offer",
+          Selected: "badge-selected",
+          Rejected: "badge-rejected",
+        };
+        return map[status] || "badge-pending";
+      }
+
+      function formatDate(d) {
+        if (!d) return "";
+        return new Date(d).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      function formatTime(t) {
+        if (!t) return "";
+        const [h, m] = t.split(":");
+        const hour = parseInt(h);
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const h12 = hour % 12 || 12;
+        return `${h12}:${m} ${ampm}`;
+      }
+
+      function interviewStatusBadge(status) {
+        const map = {
+          Scheduled: ["#dbeafe", "#1d4ed8", "Awaiting your confirmation"],
+          Confirmed: ["#d1fae5", "#047857", "Confirmed"],
+          "Reschedule Requested": [
+            "#fef3c7",
+            "#b45309",
+            "Reschedule requested",
+          ],
+        };
+        const [bg, fg, label] = map[status] || ["#f1f5f9", "#475569", status];
+        return `<span style="background:${bg};color:${fg};padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600">${label}</span>`;
+      }
+
+      async function loadDashboard() {
+        try {
+          const res = await fetch(`${API_BASE}/portal/dashboard`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+
+          if (res.status === 401 || res.status === 403) {
+            logout();
+            return;
+          }
+          if (!res.ok || !data.success) {
+            document.getElementById("loadingState").innerHTML =
+              `<p style="color:#ef4444">Failed to load your dashboard. Please try logging in again.</p>`;
+            return;
+          }
+
+          document.getElementById("positionName").textContent =
+            data.candidate.position;
+          const badge = document.getElementById("statusBadge");
+          badge.textContent = data.candidate.status;
+          badge.className = `badge ${statusBadgeClass(data.candidate.status)}`;
+
+          const list = document.getElementById("interviewList");
+          if (!data.interviews.length) {
+            list.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-icon"><i class="fa fa-calendar"></i></div>
+                <div class="empty-title">No interviews scheduled yet</div>
+                <div class="empty-desc">We'll notify you by email once an interview is scheduled.</div>
+              </div>`;
+          } else {
+            list.innerHTML = data.interviews
+              .map((i) => {
+                const canAct = i.status === "Scheduled";
+                return `
+                <div class="interview-item" id="iv-${i.id}">
+                  <div class="row">
+                    <div>
+                      <strong>${i.round_name}</strong>
+                      <div style="font-size:13px;color:#64748b;margin-top:4px">
+                        <i class="fa fa-calendar"></i> ${formatDate(i.interview_date)} &nbsp;
+                        <i class="fa fa-clock"></i> ${formatTime(i.interview_time)}
+                      </div>
+                      <div style="font-size:13px;color:#64748b;margin-top:2px">
+                        <i class="fa fa-user"></i> ${i.interviewer}
+                      </div>
+                      ${i.notes ? `<div style="font-size:13px;color:#475569;margin-top:6px">${i.notes}</div>` : ""}
+                      ${i.reschedule_reason ? `<div style="font-size:12px;color:#b45309;margin-top:6px"><i class="fa fa-circle-info"></i> Your note: ${i.reschedule_reason}</div>` : ""}
+                    </div>
+                    <div style="text-align:right">${interviewStatusBadge(i.status)}</div>
+                  </div>
+                  ${
+                    canAct
+                      ? `
+                  <div style="display:flex;gap:8px;margin-top:14px">
+                    <button class="btn btn-primary btn-sm" onclick="confirmInterview(${i.id})">
+                      <i class="fa fa-check"></i> Confirm
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="toggleReschedule(${i.id})">
+                      <i class="fa fa-calendar-days"></i> Request Reschedule
+                    </button>
+                  </div>
+                  <div class="reschedule-box" id="reschedule-${i.id}">
+                    <textarea class="form-control" id="reason-${i.id}" placeholder="Let us know why, or suggest a better time..." rows="2"></textarea>
+                    <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="submitReschedule(${i.id})">
+                      Send Request
+                    </button>
+                  </div>`
+                      : ""
+                  }
+                </div>`;
+              })
+              .join("");
+          }
+
+          document.getElementById("loadingState").style.display = "none";
+          document.getElementById("dashboardContent").style.display = "block";
+        } catch (err) {
+          document.getElementById("loadingState").innerHTML =
+            `<p style="color:#ef4444">Network error. Please refresh the page.</p>`;
+        }
+      }
+
+      function toggleReschedule(id) {
+        const box = document.getElementById(`reschedule-${id}`);
+        box.style.display = box.style.display === "block" ? "none" : "block";
+      }
+
+      async function confirmInterview(id) {
+        const res = await fetch(`${API_BASE}/portal/interviews/${id}/confirm`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          loadDashboard();
+        } else {
+          alert(data.message || "Could not confirm interview.");
+        }
+      }
+
+      async function submitReschedule(id) {
+        const reason = document.getElementById(`reason-${id}`).value.trim();
+        if (!reason) {
+          alert("Please add a reason or preferred time.");
+          return;
+        }
+        const res = await fetch(
+          `${API_BASE}/portal/interviews/${id}/reschedule`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ reason }),
+          },
+        );
+        const data = await res.json();
+        if (res.ok && data.success) {
+          loadDashboard();
+        } else {
+          alert(data.message || "Could not send reschedule request.");
+        }
+      }
+
+      loadDashboard();
+    </script>
+  </body>
+</html>

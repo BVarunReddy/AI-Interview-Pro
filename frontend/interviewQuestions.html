@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview Questions — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      .ai-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        border-radius: var(--radius-xl);
+        padding: 32px;
+        color: white;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .ai-hero h2 { font-family: "Syne", sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+      .ai-hero p { font-size: 14px; opacity: 0.7; max-width: 480px; line-height: 1.6; }
+      .ai-hero-icon { font-size: 56px; opacity: 0.15; flex-shrink: 0; }
+      .ai-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(79,70,229,.3); border: 1px solid rgba(79,70,229,.5);
+        color: #a5b4fc; padding: 4px 12px; border-radius: 999px;
+        font-size: 12px; font-weight: 600; margin-bottom: 12px;
+      }
+      .output-box {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        font-size: 14px;
+        line-height: 1.8;
+        white-space: pre-wrap;
+        min-height: 200px;
+        color: var(--text-primary);
+        font-family: inherit;
+      }
+      .output-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+      .typing::after { content: "▋"; animation: blink .8s infinite; }
+      @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0 } }
+      .question-item {
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        margin-bottom: 10px;
+        background: var(--surface);
+      }
+      .question-item .q-text { font-size: 14px; font-weight: 500; line-height: 1.5; }
+      .question-item .q-hint { font-size: 12px; color: #64748b; margin-top: 6px; font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+
+        <div class="ai-hero">
+          <div>
+            <div class="ai-badge"><i class="fa fa-wand-magic-sparkles"></i> Powered by Groq AI</div>
+            <h2>Interview Questions Generator</h2>
+            <p>Generate tailored, role-specific interview questions in seconds — with interviewer hints included.</p>
+          </div>
+          <div class="ai-hero-icon"><i class="fa fa-circle-question"></i></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:20px;align-items:start">
+
+          <!-- Input Panel -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Role & Round</div></div>
+            <div class="form-group">
+              <label class="form-label">Position <span style="color:#ef4444">*</span></label>
+              <input type="text" id="position" class="form-control" placeholder="e.g. Backend Engineer" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Experience Level</label>
+              <select id="experience" class="form-control">
+                <option value="Junior (0-2 years)">Junior (0–2 yrs)</option>
+                <option value="Mid-level (3-5 years)" selected>Mid-level (3–5 yrs)</option>
+                <option value="Senior (6+ years)">Senior (6+ yrs)</option>
+                <option value="Lead / Principal">Lead / Principal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Key Skills</label>
+              <input type="text" id="skills" class="form-control" placeholder="e.g. Node.js, SQL, Docker" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Interview Round</label>
+              <select id="round" class="form-control">
+                <option value="Screening">Screening</option>
+                <option value="Technical" selected>Technical</option>
+                <option value="System Design">System Design</option>
+                <option value="HR / Culture Fit">HR / Culture Fit</option>
+                <option value="Managerial">Managerial</option>
+                <option value="Final">Final</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Number of Questions</label>
+              <select id="count" class="form-control">
+                <option value="5">5</option>
+                <option value="8">8</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="generateBtn" onclick="generateQuestions()" data-roles="admin,hr" style="width:100%">
+              <i class="fa fa-wand-magic-sparkles"></i> Generate Questions
+            </button>
+          </div>
+
+          <!-- Output Panel -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Generated Questions</div>
+              <div id="outputActions" style="display:none;gap:8px;display:none">
+                <button class="btn btn-outline btn-sm" onclick="copyQuestions()">
+                  <i class="fa fa-copy"></i> Copy All
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="downloadQuestions()">
+                  <i class="fa fa-download"></i> Download
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="clearOutput()">
+                  <i class="fa fa-rotate-left"></i> Clear
+                </button>
+              </div>
+            </div>
+            <div id="outputBox" style="color:var(--text-muted);font-style:italic;font-size:14px;padding:12px 0">
+              Your questions will appear here...
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("interviewQuestions.html", "");
+        initPageAccess();
+      });
+
+      let rawText = "";
+
+      async function generateQuestions() {
+        const position = document.getElementById("position").value.trim();
+        if (!position) { Toast.error("Position is required."); return; }
+
+        const btn = document.getElementById("generateBtn");
+        const box = document.getElementById("outputBox");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Generating...';
+        box.style.fontStyle = "normal";
+        box.innerHTML = '<div style="color:var(--text-muted);font-size:14px"><span class="typing">Generating questions</span></div>';
+        document.getElementById("outputActions").style.display = "none";
+
+        const res = await API.generateQuestions({
+          position,
+          experience: document.getElementById("experience").value,
+          skills: document.getElementById("skills").value.trim(),
+          round: document.getElementById("round").value,
+          count: document.getElementById("count").value,
+        });
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa fa-wand-magic-sparkles"></i> Generate Questions';
+
+        if (res && res.ok && res.data.questions) {
+          rawText = res.data.questions;
+          renderQuestions(rawText);
+          document.getElementById("outputActions").style.display = "flex";
+        } else {
+          box.style.color = "#ef4444";
+          box.style.fontStyle = "normal";
+          box.textContent = res?.data?.message || "Generation failed. Check your GROQ_API_KEY in .env.";
+        }
+      }
+
+      function renderQuestions(text) {
+        const box = document.getElementById("outputBox");
+        // Split numbered lines like "1. Question text\n[Look for: ...]"
+        const lines = text.split("\n").filter(l => l.trim());
+        let html = "";
+        let currentQ = null;
+
+        for (const line of lines) {
+          const match = line.match(/^\d+\.\s+(.+)/);
+          const hintMatch = line.match(/^\[Look for:?\s*(.+)\]$/i);
+
+          if (match) {
+            if (currentQ) html += buildQItem(currentQ);
+            currentQ = { q: match[1], hint: "" };
+          } else if (hintMatch && currentQ) {
+            currentQ.hint = hintMatch[1];
+          } else if (currentQ && line.trim() && !line.match(/^\[/)) {
+            currentQ.q += " " + line.trim();
+          }
+        }
+        if (currentQ) html += buildQItem(currentQ);
+
+        box.innerHTML = html || `<pre style="white-space:pre-wrap;font-size:14px">${text}</pre>`;
+      }
+
+      function buildQItem({ q, hint }) {
+        return `<div class="question-item">
+          <div class="q-text">${q}</div>
+          ${hint ? `<div class="q-hint"><i class="fa fa-lightbulb"></i> Look for: ${hint}</div>` : ""}
+        </div>`;
+      }
+
+      function copyQuestions() {
+        navigator.clipboard.writeText(rawText).then(() => Toast.success("Copied to clipboard!"));
+      }
+
+      function downloadQuestions() {
+        const pos = document.getElementById("position").value || "interview";
+        const round = document.getElementById("round").value;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([rawText], { type: "text/plain" }));
+        a.download = `${pos.replace(/\s+/g,"-").toLowerCase()}-${round.replace(/\s+/g,"-").toLowerCase()}-questions.txt`;
+        a.click();
+      }
+
+      function clearOutput() {
+        const box = document.getElementById("outputBox");
+        box.style.fontStyle = "italic";
+        box.innerHTML = "Your questions will appear here...";
+        document.getElementById("outputActions").style.display = "none";
+        rawText = "";
+      }
+    </script>
+  </body>
+</html>

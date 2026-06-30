@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile — InterviewPro</title>
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="page-header">
+          <h1>My Profile</h1>
+          <p>Manage your account information and preferences</p>
+        </div>
+
+        <!-- Profile header card -->
+        <div class="profile-header-card">
+          <div class="profile-avatar-large" id="profileInitials">—</div>
+          <div class="profile-info">
+            <h2 id="profileName">Loading...</h2>
+            <p id="profileRole">—</p>
+            <p
+              id="profileEmail"
+              style="opacity: 0.7; font-size: 13px; margin-top: 2px"
+            >
+              —
+            </p>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Edit Profile</div>
+            </div>
+            <form id="profileForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" id="name" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    readonly
+                    style="background: #f8fafc; cursor: not-allowed"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    class="form-control"
+                    placeholder="+91 9876543210"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input
+                    type="text"
+                    id="department"
+                    class="form-control"
+                    placeholder="HR & Recruitment"
+                  />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" id="saveBtn">
+                <i class="fa fa-save"></i> Save Changes
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <div class="insight-card">
+              <h4>Account Stats</h4>
+              <div class="insight-row">
+                <span>Total Candidates Added</span
+                ><strong id="statCandidates">—</strong>
+              </div>
+              <div class="insight-row">
+                <span>Interviews Scheduled</span
+                ><strong id="statInterviews">—</strong>
+              </div>
+              <div class="insight-row">
+                <span>Feedback Submitted</span
+                ><strong id="statFeedback">—</strong>
+              </div>
+            </div>
+            <div
+              class="insight-card"
+              style="
+                background: linear-gradient(135deg, #0f172a, #1e293b);
+                color: white;
+              "
+            >
+              <h4 style="color: white">Account Details</h4>
+              <div
+                class="insight-row"
+                style="border-color: rgba(255, 255, 255, 0.1)"
+              >
+                <span style="color: rgba(255, 255, 255, 0.6)">Role</span>
+                <strong id="roleDisplay" style="color: white">—</strong>
+              </div>
+              <div
+                class="insight-row"
+                style="border-color: rgba(255, 255, 255, 0.1)"
+              >
+                <span style="color: rgba(255, 255, 255, 0.6)"
+                  >Member since</span
+                >
+                <strong id="memberSince" style="color: white">—</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script src="js/profile.js"></script>
+  </body>
+</html>

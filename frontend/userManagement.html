@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Management — InterviewPro</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+      .role-badge {
+        display: inline-block; padding: 3px 10px; border-radius: 999px;
+        font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      }
+      .role-admin    { background:#fee2e2; color:#991b1b; }
+      .role-hr       { background:#dbeafe; color:#1d4ed8; }
+      .role-interviewer { background:#d1fae5; color:#047857; }
+      .role-viewer   { background:#f1f5f9; color:#475569; }
+      .permission-grid {
+        display: grid; grid-template-columns: 1.5fr repeat(4, 1fr);
+        gap: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
+        font-size: 13px; margin-bottom: 24px;
+      }
+      .pg-head { background: var(--surface-2); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+      .pg-cell { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+      .pg-row:last-child .pg-cell { border-bottom: none; }
+      .pg-row:nth-child(even) .pg-cell { background: var(--surface-2); }
+      .tick { color: #10b981; } .cross { color: #ef4444; }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+
+        <div class="page-header" style="margin-bottom:20px">
+          <h1>User Management</h1>
+          <p>Manage team members and their access levels. Admin only.</p>
+        </div>
+
+        <!-- Permission reference -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><div class="card-title">Permission Reference</div></div>
+          <div class="permission-grid">
+            <div class="pg-head">Action</div>
+            <div class="pg-head" style="text-align:center">Admin</div>
+            <div class="pg-head" style="text-align:center">HR</div>
+            <div class="pg-head" style="text-align:center">Interviewer</div>
+            <div class="pg-head" style="text-align:center">Viewer</div>
+            ${[
+              ["View candidates / interviews / feedback", 1,1,1,1],
+              ["Add / edit candidates", 1,1,0,0],
+              ["Change candidate status", 1,1,0,0],
+              ["Delete candidates", 1,1,0,0],
+              ["Schedule / manage interviews", 1,1,0,0],
+              ["Submit feedback", 1,1,1,0],
+              ["AI scoring / JD / ranking", 1,1,0,0],
+              ["User management", 1,0,0,0],
+            ].map(([label,...perms]) => `
+              <div class="pg-row" style="display:contents">
+                <div class="pg-cell">${label}</div>
+                ${perms.map(p => `<div class="pg-cell" style="text-align:center"><i class="fa ${p ? "fa-check tick" : "fa-xmark cross"}"></i></div>`).join("")}
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <!-- User table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Team Members</div>
+            <button class="btn btn-outline btn-sm" onclick="loadUsers()">
+              <i class="fa fa-rotate"></i> Refresh
+            </button>
+          </div>
+          <div id="userTableWrap">
+            <div style="text-align:center;padding:40px;color:var(--text-muted)">
+              <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Role change modal -->
+    <div id="roleModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center">
+      <div style="background:var(--surface);border-radius:16px;padding:28px;max-width:360px;width:90%;box-shadow:var(--shadow-lg)">
+        <h3 style="font-family:'Syne',sans-serif;margin-bottom:6px">Change Role</h3>
+        <p id="roleModalDesc" style="font-size:13px;color:#64748b;margin-bottom:16px"></p>
+        <select id="roleSelect" class="form-control" style="margin-bottom:16px">
+          <option value="admin">Admin</option>
+          <option value="hr">HR</option>
+          <option value="interviewer">Interviewer</option>
+          <option value="viewer">Viewer</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="flex:1" onclick="submitRoleChange()">Save</button>
+          <button class="btn btn-outline" style="flex:1" onclick="closeRoleModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      let pendingUserId = null;
+      const currentUser = Auth.getUser() || {};
+
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("userManagement.html", "");
+        // Redirect non-admins immediately
+        if (currentUser.role !== "admin") {
+          Toast.error("Access denied. Admin only.");
+          setTimeout(() => window.location.href = "dashboard.html", 1500);
+          return;
+        }
+        loadUsers();
+      });
+
+      function roleBadge(role) {
+        return `<span class="role-badge role-${role}">${role}</span>`;
+      }
+
+      function formatDate(d) {
+        return new Date(d).toLocaleDateString("en-US", { day:"numeric", month:"short", year:"numeric" });
+      }
+
+      async function loadUsers() {
+        const wrap = document.getElementById("userTableWrap");
+        wrap.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>`;
+
+        const res = await API.getUsers();
+        if (!res || !res.ok) {
+          wrap.innerHTML = `<div style="padding:20px;color:#ef4444">Failed to load users. Are you logged in as admin?</div>`;
+          return;
+        }
+
+        const users = res.data.users;
+        if (!users.length) {
+          wrap.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fa fa-users"></i></div><div class="empty-title">No users found</div></div>`;
+          return;
+        }
+
+        wrap.innerHTML = `
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${users.map(u => {
+                const isSelf = u.id === currentUser.id;
+                return `<tr>
+                  <td><strong>${u.name}</strong> ${isSelf ? '<span style="font-size:11px;color:#64748b">(you)</span>' : ""}</td>
+                  <td style="font-size:13px;color:var(--text-muted)">${u.email}</td>
+                  <td style="font-size:13px">${u.department || "—"}</td>
+                  <td>${roleBadge(u.role)}</td>
+                  <td style="font-size:13px;color:var(--text-muted)">${formatDate(u.created_at)}</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      ${!isSelf ? `
+                        <button class="btn btn-outline btn-sm" onclick="openRoleModal(${u.id}, '${u.name}', '${u.role}')">
+                          <i class="fa fa-user-gear"></i> Role
+                        </button>
+                        <button class="btn btn-icon btn-sm" style="color:#ef4444" onclick="deleteUser(${u.id}, '${u.name}')" title="Delete user">
+                          <i class="fa fa-trash"></i>
+                        </button>` : `<span style="font-size:12px;color:var(--text-muted)">—</span>`}
+                    </div>
+                  </td>
+                </tr>`;
+              }).join("")}
+            </tbody>
+          </table>`;
+      }
+
+      function openRoleModal(id, name, currentRole) {
+        pendingUserId = id;
+        document.getElementById("roleModalDesc").textContent = `Change role for ${name}`;
+        document.getElementById("roleSelect").value = currentRole;
+        document.getElementById("roleModal").style.display = "flex";
+      }
+
+      function closeRoleModal() {
+        pendingUserId = null;
+        document.getElementById("roleModal").style.display = "none";
+      }
+
+      async function submitRoleChange() {
+        const role = document.getElementById("roleSelect").value;
+        const res = await API.updateUserRole(pendingUserId, role);
+        if (res && res.ok) {
+          Toast.success(`Role updated to ${role}`);
+          closeRoleModal();
+          loadUsers();
+        } else {
+          Toast.error(res?.data?.message || "Failed to update role.");
+        }
+      }
+
+      async function deleteUser(id, name) {
+        if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+        const res = await API.deleteUser(id);
+        if (res && res.ok) {
+          Toast.success(`${name} deleted.`);
+          loadUsers();
+        } else {
+          Toast.error(res?.data?.message || "Failed to delete user.");
+        }
+      }
+    </script>
+  </body>
+</html>
