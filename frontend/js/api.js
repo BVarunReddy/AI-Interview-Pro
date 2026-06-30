@@ -2,7 +2,7 @@
 // api.js — Centralized API Client with JWT Auth
 // ============================================================
 
-const API_BASE = "http://localhost:3000/api";
+const API_BASE = "https://ai-interview-pro-mjc7.onrender.com/api";
 
 // ── Token helpers ─────────────────────────────────────────
 const Auth = {
