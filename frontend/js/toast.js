@@ -313,7 +313,7 @@ async function loadNotifications() {
 async function markRead(id, el) {
   try {
     await fetch(
-      `http://localhost:3000/api/notifications/${id}/read`,
+      `https://ai-interview-pro-mjc7.onrender.com/api/notifications/${id}/read`,
       {
         method: "PUT",
         headers: { Authorization: `Bearer ${Auth.getToken()}` },
@@ -327,7 +327,7 @@ async function markRead(id, el) {
 async function clearAllNotifs() {
   try {
     await fetch(
-      "http://localhost:3000/api/notifications/clear",
+      "https://ai-interview-pro-mjc7.onrender.com/api/notifications/clear",
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${Auth.getToken()}` },
