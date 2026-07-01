@@ -4,62 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Activity Log — InterviewPro</title>
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/app.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <style>
       .log-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 14px;
-        padding: 14px 0;
-        border-bottom: 1px solid var(--border);
+        display: flex; align-items: flex-start; gap: 14px;
+        padding: 14px 0; border-bottom: 1px solid var(--border);
       }
-      .log-row:last-child {
-        border-bottom: none;
-      }
+      .log-row:last-child { border-bottom: none; }
       .log-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        flex-shrink: 0;
-        margin-top: 2px;
+        width: 36px; height: 36px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; flex-shrink: 0; margin-top: 2px;
       }
-      .log-body {
-        flex: 1;
-        min-width: 0;
-      }
-      .log-action {
-        font-size: 14px;
-        font-weight: 600;
-      }
-      .log-detail {
-        font-size: 13px;
-        color: var(--text-muted);
-        margin-top: 2px;
-      }
-      .log-meta {
-        font-size: 11px;
-        color: var(--text-muted);
-        margin-top: 4px;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .filter-bar {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-        margin-bottom: 16px;
-      }
+      .log-body { flex: 1; min-width: 0; }
+      .log-action { font-size: 14px; font-weight: 600; }
+      .log-detail { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+      .log-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
     </style>
   </head>
   <body>
@@ -67,15 +30,8 @@
     <div class="main">
       <div class="navbar" id="navbar"></div>
       <div class="page-content">
-        <div
-          class="page-header"
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-          "
-        >
+
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
           <div>
             <h1>Activity Log</h1>
             <p>Full audit trail of all actions taken in the system</p>
@@ -86,50 +42,31 @@
         </div>
 
         <div class="filter-bar">
-          <select
-            id="entityFilter"
-            class="form-control"
-            style="width: auto"
-            onchange="loadLogs()"
-          >
+          <select id="entityFilter" class="form-control" style="width:auto" onchange="loadLogs()">
             <option value="all">All Activity</option>
             <option value="candidate">Candidates</option>
             <option value="interview">Interviews</option>
             <option value="feedback">Feedback</option>
             <option value="user">User Logins</option>
           </select>
-          <select
-            id="userFilter"
-            class="form-control"
-            style="width: auto"
-            onchange="loadLogs()"
-          >
+          <select id="userFilter" class="form-control" style="width:auto" onchange="loadLogs()">
             <option value="">All Users</option>
           </select>
-          <select
-            id="limitFilter"
-            class="form-control"
-            style="width: auto"
-            onchange="loadLogs()"
-          >
+          <select id="limitFilter" class="form-control" style="width:auto" onchange="loadLogs()">
             <option value="25">Last 25</option>
             <option value="50" selected>Last 50</option>
             <option value="100">Last 100</option>
             <option value="200">Last 200</option>
           </select>
-          <span
-            id="logCount"
-            style="font-size: 13px; color: var(--text-muted); margin-left: auto"
-          ></span>
+          <span id="logCount" style="font-size:13px;color:var(--text-muted);margin-left:auto"></span>
         </div>
 
         <div class="card" id="logCard">
-          <div
-            style="text-align: center; padding: 40px; color: var(--text-muted)"
-          >
-            <i class="fa fa-spinner fa-spin" style="font-size: 24px"></i>
+          <div style="text-align:center;padding:40px;color:var(--text-muted)">
+            <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -137,68 +74,29 @@
     <script src="js/toast.js"></script>
     <script>
       const ICON_MAP = {
-        "Added Candidate": {
-          icon: "fa-user-plus",
-          bg: "#ede9fe",
-          color: "#5b21b6",
-        },
-        "Status Changed": {
-          icon: "fa-arrows-rotate",
-          bg: "#dbeafe",
-          color: "#1d4ed8",
-        },
-        "Deleted Candidate": {
-          icon: "fa-user-minus",
-          bg: "#fee2e2",
-          color: "#991b1b",
-        },
-        "Scheduled Interview": {
-          icon: "fa-calendar-plus",
-          bg: "#d1fae5",
-          color: "#047857",
-        },
-        "Interview Status Updated": {
-          icon: "fa-calendar-check",
-          bg: "#d1fae5",
-          color: "#047857",
-        },
-        "Deleted Interview": {
-          icon: "fa-calendar-xmark",
-          bg: "#fee2e2",
-          color: "#991b1b",
-        },
-        "Submitted Feedback": {
-          icon: "fa-comment-dots",
-          bg: "#fef3c7",
-          color: "#b45309",
-        },
-        "Logged In": {
-          icon: "fa-right-to-bracket",
-          bg: "#f1f5f9",
-          color: "#475569",
-        },
+        "Added Candidate":        { icon: "fa-user-plus",         bg: "#ede9fe", color: "#5b21b6" },
+        "Status Changed":         { icon: "fa-arrows-rotate",     bg: "#dbeafe", color: "#1d4ed8" },
+        "Deleted Candidate":      { icon: "fa-user-minus",        bg: "#fee2e2", color: "#991b1b" },
+        "Scheduled Interview":    { icon: "fa-calendar-plus",     bg: "#d1fae5", color: "#047857" },
+        "Interview Status Updated":{ icon: "fa-calendar-check",   bg: "#d1fae5", color: "#047857" },
+        "Deleted Interview":      { icon: "fa-calendar-xmark",    bg: "#fee2e2", color: "#991b1b" },
+        "Submitted Feedback":     { icon: "fa-comment-dots",      bg: "#fef3c7", color: "#b45309" },
+        "Logged In":              { icon: "fa-right-to-bracket",  bg: "#f1f5f9", color: "#475569" },
       };
 
       function timeAgo(dateStr) {
         const diff = (Date.now() - new Date(dateStr)) / 1000;
-        if (diff < 60) return "just now";
+        if (diff < 60)   return "just now";
         if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
         if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-        return new Date(dateStr).toLocaleDateString("en-US", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
+        return new Date(dateStr).toLocaleDateString("en-US", { day:"numeric", month:"short", year:"numeric" });
       }
 
       function fullDate(dateStr) {
         return new Date(dateStr).toLocaleString("en-US", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
+          day: "numeric", month: "short", year: "numeric",
+          hour: "2-digit", minute: "2-digit",
         });
       }
 
@@ -207,8 +105,8 @@
       async function loadLogs() {
         const entity = document.getElementById("entityFilter").value;
         const userId = document.getElementById("userFilter").value;
-        const limit = document.getElementById("limitFilter").value;
-        const card = document.getElementById("logCard");
+        const limit  = document.getElementById("limitFilter").value;
+        const card   = document.getElementById("logCard");
 
         card.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></div>`;
 
@@ -227,7 +125,7 @@
         // Populate user filter once
         if (!usersLoaded && users.length) {
           const sel = document.getElementById("userFilter");
-          users.forEach((u) => {
+          users.forEach(u => {
             const opt = document.createElement("option");
             opt.value = u.user_id;
             opt.textContent = u.user_name;
@@ -249,14 +147,9 @@
           return;
         }
 
-        card.innerHTML = logs
-          .map((log) => {
-            const { icon, bg, color } = ICON_MAP[log.action] || {
-              icon: "fa-circle-dot",
-              bg: "#f1f5f9",
-              color: "#475569",
-            };
-            return `
+        card.innerHTML = logs.map(log => {
+          const { icon, bg, color } = ICON_MAP[log.action] || { icon: "fa-circle-dot", bg: "#f1f5f9", color: "#475569" };
+          return `
             <div class="log-row">
               <div class="log-icon" style="background:${bg};color:${color}">
                 <i class="fa ${icon}"></i>
@@ -271,8 +164,7 @@
                 </div>
               </div>
             </div>`;
-          })
-          .join("");
+        }).join("");
       }
 
       document.addEventListener("DOMContentLoaded", () => {

@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interview Scorecard — InterviewPro</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .compare-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+      .compare-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+      }
+      .compare-card h4 {
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .compare-card p {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+      }
+      .score-bar-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 13px;
+      }
+      .score-bar-label {
+        width: 120px;
+        flex-shrink: 0;
+      }
+      .score-bar-track {
+        flex: 1;
+        height: 8px;
+        background: var(--surface-2);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .score-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.8s ease;
+      }
+      .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .rank-1 {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .rank-2 {
+        background: #f1f5f9;
+        color: #475569;
+      }
+      .rank-3 {
+        background: #fce7f3;
+        color: #9d174d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="navbar" id="navbar"></div>
+      <div class="page-content">
+        <div class="page-header">
+          <h1>Interview Scorecard</h1>
+          <p>Compare candidates side by side based on feedback scores</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 20px">
+          <div class="card-header">
+            <div class="card-title">Select Candidates to Compare</div>
+          </div>
+          <div
+            style="
+              display: flex;
+              gap: 12px;
+              flex-wrap: wrap;
+              align-items: flex-end;
+            "
+          >
+            <div
+              class="form-group"
+              style="margin: 0; flex: 1; min-width: 200px"
+            >
+              <label class="form-label">Candidate 1</label>
+              <select id="cand1" class="form-control">
+                <option value="">— Select —</option>
+              </select>
+            </div>
+            <div
+              class="form-group"
+              style="margin: 0; flex: 1; min-width: 200px"
+            >
+              <label class="form-label">Candidate 2</label>
+              <select id="cand2" class="form-control">
+                <option value="">— Select —</option>
+              </select>
+            </div>
+            <div
+              class="form-group"
+              style="margin: 0; flex: 1; min-width: 200px"
+            >
+              <label class="form-label">Candidate 3 (optional)</label>
+              <select id="cand3" class="form-control">
+                <option value="">— Select —</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="compareScores()">
+              <i class="fa fa-chart-bar"></i> Compare
+            </button>
+          </div>
+        </div>
+
+        <!-- Radar Chart -->
+        <div id="chartSection" style="display: none; margin-bottom: 20px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Skills Radar</div>
+            </div>
+            <div style="max-width: 400px; margin: 0 auto">
+              <canvas id="radarChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compare Cards -->
+        <div class="compare-grid" id="compareGrid"></div>
+      </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/toast.js"></script>
+    <script>
+      let feedbackData = [];
+      let radarChart = null;
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!Auth.requireAuth()) return;
+        initDarkMode();
+        initUI("scorecard.html", "");
+
+        const [cRes, fRes] = await Promise.all([
+          API.getCandidates({ limit: 200 }),
+          API.getFeedback(),
+        ]);
+        if (cRes?.ok && fRes?.ok) {
+          feedbackData = fRes.data.feedbacks;
+          const candidates = cRes.data.candidates;
+          ["cand1", "cand2", "cand3"].forEach((id) => {
+            const sel = document.getElementById(id);
+            candidates.forEach((c) => {
+              const hasFeedback = feedbackData.some(
+                (f) => f.candidate_id == c.id,
+              );
+              if (hasFeedback) {
+                const o = document.createElement("option");
+                o.value = c.id;
+                o.textContent = `${c.name} — ${c.position}`;
+                sel.appendChild(o);
+              }
+            });
+          });
+        }
+      });
+
+      function compareScores() {
+        const ids = ["cand1", "cand2", "cand3"]
+          .map((id) => document.getElementById(id).value)
+          .filter(Boolean);
+        if (ids.length < 2) {
+          Toast.warning("Please select at least 2 candidates.");
+          return;
+        }
+
+        const data = ids
+          .map((id) => {
+            const fbs = feedbackData.filter((f) => f.candidate_id == id);
+            if (!fbs.length) return null;
+            const avg = (key) =>
+              (
+                fbs.reduce((s, f) => s + (parseFloat(f[key]) || 0), 0) /
+                fbs.length
+              ).toFixed(1);
+            return {
+              name: fbs[0].candidate_name,
+              technical: parseFloat(avg("technical_score")),
+              communication: parseFloat(avg("communication_score")),
+              problem_solving: parseFloat(avg("problem_solving_score")),
+              overall: parseFloat(avg("overall_score")),
+              recommendation: fbs[fbs.length - 1].recommendation,
+            };
+          })
+          .filter(Boolean);
+
+        if (!data.length) {
+          Toast.error("No feedback found for selected candidates.");
+          return;
+        }
+
+        // Sort by overall score
+        data.sort((a, b) => b.overall - a.overall);
+
+        // Radar chart
+        document.getElementById("chartSection").style.display = "block";
+        if (radarChart) radarChart.destroy();
+        const colors = [
+          "rgba(79,70,229,.7)",
+          "rgba(16,185,129,.7)",
+          "rgba(245,158,11,.7)",
+        ];
+        const ctx = document.getElementById("radarChart").getContext("2d");
+        radarChart = new Chart(ctx, {
+          type: "radar",
+          data: {
+            labels: [
+              "Technical",
+              "Communication",
+              "Problem Solving",
+              "Overall",
+            ],
+            datasets: data.map((d, i) => ({
+              label: d.name,
+              data: [
+                d.technical,
+                d.communication,
+                d.problem_solving,
+                d.overall,
+              ],
+              backgroundColor: colors[i].replace(".7", ".15"),
+              borderColor: colors[i],
+              borderWidth: 2,
+              pointRadius: 4,
+            })),
+          },
+          options: {
+            responsive: true,
+            scales: { r: { min: 0, max: 10, ticks: { stepSize: 2 } } },
+          },
+        });
+
+        // Compare cards
+        const ranks = ["🥇", "🥈", "🥉"];
+        document.getElementById("compareGrid").innerHTML = data
+          .map(
+            (d, i) => `
+    <div class="compare-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+        <span style="font-size:20px">${ranks[i] || ""}</span>
+        <h4>${d.name}</h4>
+      </div>
+      <p>${statusBadge(d.recommendation)}</p>
+      <div class="score-bar-row">
+        <span class="score-bar-label">Technical</span>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:${d.technical * 10}%;background:#4f46e5"></div></div>
+        <span style="font-weight:700;font-size:13px">${d.technical}</span>
+      </div>
+      <div class="score-bar-row">
+        <span class="score-bar-label">Communication</span>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:${d.communication * 10}%;background:#10b981"></div></div>
+        <span style="font-weight:700;font-size:13px">${d.communication}</span>
+      </div>
+      <div class="score-bar-row">
+        <span class="score-bar-label">Problem Solving</span>
+        <div class="score-bar-track"><div class="score-bar-fill" style="width:${d.problem_solving * 10}%;background:#f59e0b"></div></div>
+        <span style="font-weight:700;font-size:13px">${d.problem_solving}</span>
+      </div>
+      <hr class="divider"/>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:600">Overall</span>
+        <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${i === 0 ? "#4f46e5" : "#64748b"}">${d.overall}</span>
+      </div>
+    </div>`,
+          )
+          .join("");
+
+        Toast.success("Comparison ready!");
+      }
+    </script>
+  </body>
+</html>

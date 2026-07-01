@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initDarkMode();
   initDarkMode();
   initUI("analytics.html", "Search analytics...");
+  initPageAccess();
 
   const [statsRes, fbRes] = await Promise.all([
     API.getStats(),

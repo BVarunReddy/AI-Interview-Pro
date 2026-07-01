@@ -99,11 +99,9 @@ async function loadDashboard() {
       "Submitted Feedback": { icon: "fa-comment-dots", color: "#f59e0b" },
       "Logged In": { icon: "fa-right-to-bracket", color: "#94a3b8" },
     };
-    document.getElementById("activityFeed").innerHTML = logs
-      .slice(0, 20)
+    document.getElementById("activityFeed").innerHTML = logs.slice(0, 20)
       .map((l) => {
-        const { icon = "fa-circle-dot", color = "#64748b" } =
-          ACTION_ICON[l.action] || {};
+        const { icon = "fa-circle-dot", color = "#64748b" } = ACTION_ICON[l.action] || {};
         const ago = (() => {
           const s = (Date.now() - new Date(l.created_at)) / 1000;
           if (s < 60) return "just now";
@@ -119,8 +117,7 @@ async function loadDashboard() {
           <div class="activity-time">${l.user_name} · ${ago}</div>
         </div>
       </div>`;
-      })
-      .join("");
+      }).join("");
   } else {
     document.getElementById("activityFeed").innerHTML =
       '<div class="empty-state"><div class="empty-icon"><i class="fa fa-stream"></i></div><div class="empty-title">No activity yet</div></div>';
