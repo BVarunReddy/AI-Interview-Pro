@@ -2,7 +2,11 @@
 // api.js — Centralized API Client with JWT Auth
 // ============================================================
 
-const API_BASE = "https://ai-interview-pro-mjc7.onrender.com/api";
+const API_BASE =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:3000/api"
+    : "https://ai-interview-pro-mjc7.onrender.com/api";
 
 // ── Token helpers ─────────────────────────────────────────
 const Auth = {
@@ -122,15 +126,23 @@ const API = {
   generateJD: (body) =>
     apiFetch("/ai/generate-jd", { method: "POST", body: JSON.stringify(body) }),
   generateQuestions: (body) =>
-    apiFetch("/ai/generate-questions", { method: "POST", body: JSON.stringify(body) }),
+    apiFetch("/ai/generate-questions", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 
   getRanking: (position) =>
-    apiFetch(`/candidates/ranking${position ? "?position=" + encodeURIComponent(position) : ""}`),
+    apiFetch(
+      `/candidates/ranking${position ? "?position=" + encodeURIComponent(position) : ""}`,
+    ),
 
   // User management (admin only)
   getUsers: () => apiFetch("/auth/users"),
   updateUserRole: (id, role) =>
-    apiFetch(`/auth/users/${id}/role`, { method: "PUT", body: JSON.stringify({ role }) }),
+    apiFetch(`/auth/users/${id}/role`, {
+      method: "PUT",
+      body: JSON.stringify({ role }),
+    }),
   deleteUser: (id) => apiFetch(`/auth/users/${id}`, { method: "DELETE" }),
 
   // Offer Letters

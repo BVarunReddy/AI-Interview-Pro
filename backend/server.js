@@ -8,7 +8,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ─── MIDDLEWARE ────────────────────────────────────────────
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5500",
+      "http://127.0.0.1:5500",
+      "https://interviewpro-portal.onrender.com",
+    ],
+    credentials: true,
+  }),
+);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -51,5 +61,7 @@ app.use((err, req, res, next) => {
 
 // ─── START SERVER ──────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`🚀 InterviewPro Server running on port ${PORT}`);
+  console.log(`\n🚀 InterviewPro Server v2.0`);
+  console.log(`   Running on: http://localhost:${PORT}`);
+  console.log(`   Environment: ${process.env.NODE_ENV || "development"}\n`);
 });
