@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Apply — InterviewPro</title>
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/app.css" />
     <link
       rel="stylesheet"
@@ -170,32 +170,22 @@
 
         <div id="applySuccess">
           <i class="fa fa-circle-check"></i>
-          <h3
-            style="
-              font-family: &quot;Syne&quot;, sans-serif;
-              margin-bottom: 8px;
-            "
-          >
+          <h3 style="font-family: 'Syne', sans-serif; margin-bottom: 8px">
             Application Submitted!
           </h3>
           <p style="color: #64748b; font-size: 14px; margin-bottom: 20px">
-            Thank you for applying. We'll review your application and reach out
-            by email if you're shortlisted.
+            Thank you for applying. We'll review your application and reach
+            out by email if you're shortlisted.
           </p>
           <a href="portalSignup.html" class="btn btn-primary">
-            <i class="fa fa-user-plus"></i> Create a Portal Account to Track
-            Status
+            <i class="fa fa-user-plus"></i> Create a Portal Account to Track Status
           </a>
         </div>
       </div>
     </div>
 
     <script>
-      const API_BASE =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1"
-          ? "http://localhost:3000/api"
-          : "https://ai-interview-pro-mjc7.onrender.com/api";
+      const API_BASE = "https://ai-interview-pro-mjc7.onrender.com/api";
 
       // Populate position suggestions from existing open roles
       fetch(`${API_BASE}/public/positions`)
@@ -284,9 +274,7 @@
                 '<i class="fa fa-paper-plane"></i> Submit Application';
             }
           } catch (err) {
-            showError(
-              "Network error. Please check your connection and try again.",
-            );
+            showError("Network error. Please check your connection and try again.");
             btn.disabled = false;
             btn.innerHTML =
               '<i class="fa fa-paper-plane"></i> Submit Application';

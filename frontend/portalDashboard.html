@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Application — InterviewPro</title>
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/app.css" />
     <link
       rel="stylesheet"
@@ -66,15 +66,8 @@
         </button>
       </div>
 
-      <div
-        id="loadingState"
-        class="card"
-        style="text-align: center; padding: 40px"
-      >
-        <i
-          class="fa fa-spinner fa-spin"
-          style="font-size: 24px; color: #4f46e5"
-        ></i>
+      <div id="loadingState" class="card" style="text-align: center; padding: 40px">
+        <i class="fa fa-spinner fa-spin" style="font-size: 24px; color: #4f46e5"></i>
       </div>
 
       <div id="dashboardContent" style="display: none">
@@ -82,13 +75,7 @@
           <p style="color: #64748b; font-size: 13px; margin-bottom: 6px">
             Applying for
           </p>
-          <h2
-            id="positionName"
-            style="
-              font-family: &quot;Syne&quot;, sans-serif;
-              margin-bottom: 14px;
-            "
-          ></h2>
+          <h2 id="positionName" style="font-family: 'Syne', sans-serif; margin-bottom: 14px"></h2>
           <span id="statusBadge" class="badge"></span>
         </div>
 
@@ -102,11 +89,7 @@
     </div>
 
     <script>
-      const API_BASE =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1"
-          ? "http://localhost:3000/api"
-          : "https://ai-interview-pro-mjc7.onrender.com/api";
+      const API_BASE = "https://ai-interview-pro-mjc7.onrender.com/api";
       const token = localStorage.getItem("portalToken");
 
       if (!token) {
@@ -153,11 +136,7 @@
         const map = {
           Scheduled: ["#dbeafe", "#1d4ed8", "Awaiting your confirmation"],
           Confirmed: ["#d1fae5", "#047857", "Confirmed"],
-          "Reschedule Requested": [
-            "#fef3c7",
-            "#b45309",
-            "Reschedule requested",
-          ],
+          "Reschedule Requested": ["#fef3c7", "#b45309", "Reschedule requested"],
         };
         const [bg, fg, label] = map[status] || ["#f1f5f9", "#475569", status];
         return `<span style="background:${bg};color:${fg};padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600">${label}</span>`;
@@ -180,8 +159,7 @@
             return;
           }
 
-          document.getElementById("positionName").textContent =
-            data.candidate.position;
+          document.getElementById("positionName").textContent = data.candidate.position;
           const badge = document.getElementById("statusBadge");
           badge.textContent = data.candidate.status;
           badge.className = `badge ${statusBadgeClass(data.candidate.status)}`;
@@ -271,17 +249,14 @@
           alert("Please add a reason or preferred time.");
           return;
         }
-        const res = await fetch(
-          `${API_BASE}/portal/interviews/${id}/reschedule`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ reason }),
+        const res = await fetch(`${API_BASE}/portal/interviews/${id}/reschedule`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-        );
+          body: JSON.stringify({ reason }),
+        });
         const data = await res.json();
         if (res.ok && data.success) {
           loadDashboard();

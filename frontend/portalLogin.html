@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Portal Login — InterviewPro</title>
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/app.css" />
     <link
       rel="stylesheet"
@@ -92,11 +92,7 @@
     </div>
 
     <script>
-      const API_BASE =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1"
-          ? "http://localhost:3000/api"
-          : "https://ai-interview-pro-mjc7.onrender.com/api";
+      const API_BASE = "https://ai-interview-pro-mjc7.onrender.com/api";
 
       function showMsg(msg) {
         let el = document.getElementById("formMsg");
@@ -112,40 +108,38 @@
         el.textContent = msg;
       }
 
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const email = document.getElementById("email").value.trim();
-          const password = document.getElementById("password").value;
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
 
-          const btn = document.getElementById("submitBtn");
-          btn.disabled = true;
-          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Logging in...';
+        const btn = document.getElementById("submitBtn");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Logging in...';
 
-          try {
-            const res = await fetch(`${API_BASE}/portal/login`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email, password }),
-            });
-            const data = await res.json();
+        try {
+          const res = await fetch(`${API_BASE}/portal/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await res.json();
 
-            if (res.ok && data.success) {
-              localStorage.setItem("portalToken", data.token);
-              localStorage.setItem("portalEmail", data.email);
-              window.location.href = "portalDashboard.html";
-            } else {
-              showMsg(data.message || "Login failed.");
-              btn.disabled = false;
-              btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Log In';
-            }
-          } catch (err) {
-            showMsg("Network error. Please try again.");
+          if (res.ok && data.success) {
+            localStorage.setItem("portalToken", data.token);
+            localStorage.setItem("portalEmail", data.email);
+            window.location.href = "portalDashboard.html";
+          } else {
+            showMsg(data.message || "Login failed.");
             btn.disabled = false;
             btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Log In';
           }
-        });
+        } catch (err) {
+          showMsg("Network error. Please try again.");
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Log In';
+        }
+      });
     </script>
   </body>
 </html>

@@ -2,6 +2,8 @@
 // toast.js — Toast Notifications + Shared UI Helpers
 // ============================================================
 
+const BACKEND_URL = "https://ai-interview-pro-mjc7.onrender.com";
+
 const Toast = (() => {
   let container;
   function getContainer() {
@@ -51,70 +53,20 @@ const Toast = (() => {
 // ── Sidebar ───────────────────────────────────────────────
 function buildSidebar(activePage) {
   const links = [
-    { href: "dashboard.html", icon: "fa-chart-line", label: "Dashboard" },
-    {
-      href: "addCandidate.html",
-      icon: "fa-user-plus",
-      label: "Add Candidate",
-      roles: ["admin", "hr"],
-    },
-    {
-      href: "bulkImport.html",
-      icon: "fa-file-excel",
-      label: "Bulk Import",
-      roles: ["admin", "hr"],
-    },
-    { href: "viewCandidates.html", icon: "fa-users", label: "Candidates" },
-    {
-      href: "candidateRanking.html",
-      icon: "fa-ranking-star",
-      label: "Auto-Ranking",
-      roles: ["admin", "hr"],
-    },
-    {
-      href: "scheduleInterview.html",
-      icon: "fa-calendar-alt",
-      label: "Schedule Interview",
-      roles: ["admin", "hr"],
-    },
-    { href: "viewInterviews.html", icon: "fa-clock", label: "View Interviews" },
-    {
-      href: "feedback.html",
-      icon: "fa-comment-alt",
-      label: "Feedback",
-      roles: ["admin", "hr", "interviewer"],
-    },
-    { href: "analytics.html", icon: "fa-chart-bar", label: "Analytics" },
-    {
-      href: "userManagement.html",
-      icon: "fa-users-gear",
-      label: "User Management",
-      roles: ["admin"],
-    },
-    {
-      href: "aiScore.html",
-      icon: "fa-robot",
-      label: "AI Scoring",
-      roles: ["admin", "hr"],
-    },
-    {
-      href: "jdGenerator.html",
-      icon: "fa-file-pen",
-      label: "JD Generator",
-      roles: ["admin", "hr"],
-    },
-    {
-      href: "interviewQuestions.html",
-      icon: "fa-circle-question",
-      label: "Interview Questions",
-      roles: ["admin", "hr"],
-    },
-    {
-      href: "offerLetter.html",
-      icon: "fa-file-signature",
-      label: "Offer Letter",
-      roles: ["admin", "hr"],
-    },
+    { href: "dashboard.html",         icon: "fa-chart-line",      label: "Dashboard" },
+    { href: "addCandidate.html",       icon: "fa-user-plus",       label: "Add Candidate",         roles: ["admin","hr"] },
+    { href: "bulkImport.html",         icon: "fa-file-excel",      label: "Bulk Import",           roles: ["admin","hr"] },
+    { href: "viewCandidates.html",     icon: "fa-users",           label: "Candidates" },
+    { href: "candidateRanking.html",   icon: "fa-ranking-star",    label: "Auto-Ranking",          roles: ["admin","hr"] },
+    { href: "scheduleInterview.html",  icon: "fa-calendar-alt",    label: "Schedule Interview",    roles: ["admin","hr"] },
+    { href: "viewInterviews.html",     icon: "fa-clock",           label: "View Interviews" },
+    { href: "feedback.html",           icon: "fa-comment-alt",     label: "Feedback",              roles: ["admin","hr","interviewer"] },
+    { href: "analytics.html",          icon: "fa-chart-bar",       label: "Analytics" },
+    { href: "userManagement.html",     icon: "fa-users-gear",      label: "User Management",       roles: ["admin"] },
+    { href: "aiScore.html",            icon: "fa-robot",           label: "AI Scoring",            roles: ["admin","hr"] },
+    { href: "jdGenerator.html",        icon: "fa-file-pen",        label: "JD Generator",          roles: ["admin","hr"] },
+    { href: "interviewQuestions.html", icon: "fa-circle-question", label: "Interview Questions",   roles: ["admin","hr"] },
+    { href: "offerLetter.html",        icon: "fa-file-signature",  label: "Offer Letter",          roles: ["admin","hr"] },
   ];
   const user = Auth.getUser() || {};
   const role = user.role || "viewer";
@@ -149,16 +101,12 @@ function buildNavbar(searchPlaceholder = "Search...") {
     <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileSidebar()" aria-label="Toggle menu">
       <i class="fa fa-bars"></i>
     </button>
-    ${
-      searchPlaceholder
-        ? `
+    ${searchPlaceholder ? `
       <div class="search-wrap" style="position:relative">
         <i class="fa fa-search"></i>
         <input type="text" id="globalSearch" placeholder="Search candidates, interviews..." autocomplete="off"/>
         <div id="searchDropdown" style="display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:500;max-height:420px;overflow-y:auto;min-width:360px"></div>
-      </div>`
-        : `<div></div>`
-    }
+      </div>` : `<div></div>`}
     <div class="nav-right">
       <button class="dark-toggle" id="darkToggle" onclick="toggleDark()" title="Toggle dark mode"><i class="fa fa-moon"></i></button>
       <a href="calender.html" class="dark-toggle" title="Calendar" style="text-decoration:none;display:flex;align-items:center;justify-content:center"><i class="fa fa-calendar"></i></a>
@@ -196,13 +144,13 @@ function initUI(activePage, searchPlaceholder) {
     if (saved) nav.scrollTop = parseInt(saved, 10);
 
     // Save scroll position whenever the user scrolls the nav
-    nav.addEventListener("scroll", function () {
+    nav.addEventListener("scroll", function() {
       sessionStorage.setItem("sidebarScroll", nav.scrollTop);
     });
 
     // Also save immediately when a nav link is clicked
-    nav.querySelectorAll("a").forEach(function (a) {
-      a.addEventListener("click", function () {
+    nav.querySelectorAll("a").forEach(function(a) {
+      a.addEventListener("click", function() {
         sessionStorage.setItem("sidebarScroll", nav.scrollTop);
       });
     });
@@ -243,25 +191,19 @@ function initUI(activePage, searchPlaceholder) {
 
   // ── Global Search ──────────────────────────────────────
   const searchInput = document.getElementById("globalSearch");
-  const searchDrop = document.getElementById("searchDropdown");
+  const searchDrop  = document.getElementById("searchDropdown");
   if (searchInput && searchDrop) {
     let searchTimer;
 
     searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim();
       clearTimeout(searchTimer);
-      if (q.length < 2) {
-        searchDrop.style.display = "none";
-        return;
-      }
+      if (q.length < 2) { searchDrop.style.display = "none"; return; }
       searchTimer = setTimeout(() => runGlobalSearch(q), 300);
     });
 
     searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        searchDrop.style.display = "none";
-        searchInput.value = "";
-      }
+      if (e.key === "Escape") { searchDrop.style.display = "none"; searchInput.value = ""; }
     });
 
     document.addEventListener("click", (e) => {
@@ -269,6 +211,7 @@ function initUI(activePage, searchPlaceholder) {
         searchDrop.style.display = "none";
     });
   }
+
 }
 
 // ── Dark Mode ─────────────────────────────────────────────
@@ -300,10 +243,7 @@ function initDarkMode() {
 async function fetchNotifCount() {
   try {
     const res = await fetch(
-      (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-        ? "http://localhost:3000"
-        : "https://ai-interview-pro-mjc7.onrender.com") + "/api/notifications",
+      (BACKEND_URL + "/api/notifications"),
       {
         headers: { Authorization: `Bearer ${Auth.getToken()}` },
       },
@@ -322,10 +262,7 @@ async function fetchNotifCount() {
 async function loadNotifications() {
   try {
     const res = await fetch(
-      (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-        ? "http://localhost:3000"
-        : "https://ai-interview-pro-mjc7.onrender.com") + "/api/notifications",
+      (BACKEND_URL + "/api/notifications"),
       {
         headers: { Authorization: `Bearer ${Auth.getToken()}` },
       },
@@ -378,11 +315,7 @@ async function loadNotifications() {
 async function markRead(id, el) {
   try {
     await fetch(
-      (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-        ? "http://localhost:3000"
-        : "https://ai-interview-pro-mjc7.onrender.com") +
-        `/api/notifications/${id}/read`,
+      (BACKEND_URL + `/api/notifications/${id}/read`),
       {
         method: "PUT",
         headers: { Authorization: `Bearer ${Auth.getToken()}` },
@@ -396,11 +329,7 @@ async function markRead(id, el) {
 async function clearAllNotifs() {
   try {
     await fetch(
-      (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-        ? "http://localhost:3000"
-        : "https://ai-interview-pro-mjc7.onrender.com") +
-        "/api/notifications/clear",
+      (BACKEND_URL + "/api/notifications/clear"),
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${Auth.getToken()}` },
@@ -497,10 +426,7 @@ function initPageAccess() {
 
   // Hide elements that require specific roles
   document.querySelectorAll("[data-roles]").forEach((el) => {
-    const allowed = el
-      .getAttribute("data-roles")
-      .split(",")
-      .map((r) => r.trim());
+    const allowed = el.getAttribute("data-roles").split(",").map((r) => r.trim());
     if (!allowed.includes(role)) {
       el.style.display = "none";
     }
@@ -514,8 +440,7 @@ function initPageAccess() {
       banner.id = "viewerBanner";
       banner.style.cssText =
         "background:#fef3c7;color:#92400e;padding:8px 16px;font-size:13px;text-align:center;border-bottom:1px solid #fcd34d;position:sticky;top:0;z-index:50";
-      banner.innerHTML =
-        '<i class="fa fa-eye"></i> You are in <strong>Viewer</strong> mode — read only access';
+      banner.innerHTML = '<i class="fa fa-eye"></i> You are in <strong>Viewer</strong> mode — read only access';
       const content = document.querySelector(".page-content");
       if (content) content.insertBefore(banner, content.firstChild);
     }
@@ -529,8 +454,7 @@ function initPageAccess() {
       banner.id = "interviewerBanner";
       banner.style.cssText =
         "background:#dbeafe;color:#1e40af;padding:8px 16px;font-size:13px;text-align:center;border-bottom:1px solid #bfdbfe;position:sticky;top:0;z-index:50";
-      banner.innerHTML =
-        '<i class="fa fa-user-tie"></i> You are logged in as <strong>Interviewer</strong> — you can view candidates and submit feedback';
+      banner.innerHTML = '<i class="fa fa-user-tie"></i> You are logged in as <strong>Interviewer</strong> — you can view candidates and submit feedback';
       const content = document.querySelector(".page-content");
       if (content) content.insertBefore(banner, content.firstChild);
     }
@@ -543,9 +467,7 @@ function toggleMobileSidebar() {
   const overlay = document.getElementById("sidebarOverlay");
   if (!sidebar) return;
   const isOpen = sidebar.classList.contains("mobile-open");
-  if (isOpen) {
-    closeMobileSidebar();
-  } else {
+  if (isOpen) { closeMobileSidebar(); } else {
     sidebar.classList.add("mobile-open");
     if (overlay) overlay.classList.add("active");
   }
@@ -584,10 +506,8 @@ function renderSearchResults(drop, results, total, q) {
 
   const hl = (text) => {
     if (!text) return "";
-    return String(text).replace(
-      new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"),
-      `<mark style="background:#fef08a;color:#713f12;border-radius:2px;padding:0 2px">$1</mark>`,
-    );
+    return String(text).replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi"),
+      `<mark style="background:#fef08a;color:#713f12;border-radius:2px;padding:0 2px">$1</mark>`);
   };
 
   const section = (icon, color, label, items) => {
@@ -596,15 +516,13 @@ function renderSearchResults(drop, results, total, q) {
       <div style="padding:8px 12px 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);background:var(--surface-2)">
         <i class="fa ${icon}" style="color:${color}"></i> ${label}
       </div>
-      ${items
-        .map((item) => {
-          if (item._type === "candidate")
-            return `
+      ${items.map(item => {
+        if (item._type === "candidate") return `
           <a href="viewCandidates.html" onclick="document.getElementById('searchDropdown').style.display='none'"
              style="display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--border);cursor:pointer"
              onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
             <div style="width:32px;height:32px;border-radius:50%;background:#ede9fe;color:#5b21b6;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">
-              ${(item.name || "?")[0].toUpperCase()}
+              ${(item.name||"?")[0].toUpperCase()}
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600">${hl(item.name)}</div>
@@ -612,8 +530,7 @@ function renderSearchResults(drop, results, total, q) {
             </div>
             ${statusBadge(item.status)}
           </a>`;
-          if (item._type === "interview")
-            return `
+        if (item._type === "interview") return `
           <a href="viewInterviews.html" onclick="document.getElementById('searchDropdown').style.display='none'"
              style="display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--border);cursor:pointer"
              onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
@@ -622,12 +539,11 @@ function renderSearchResults(drop, results, total, q) {
             </div>
             <div style="flex:1;min-width:0">
               <div style="font-size:13px;font-weight:600">${hl(item.candidate_name)}</div>
-              <div style="font-size:12px;color:var(--text-muted)">${hl(item.round_name)} · ${item.interview_date ? new Date(item.interview_date).toLocaleDateString("en-US", { day: "numeric", month: "short" }) : ""}</div>
+              <div style="font-size:12px;color:var(--text-muted)">${hl(item.round_name)} · ${item.interview_date ? new Date(item.interview_date).toLocaleDateString("en-US",{day:"numeric",month:"short"}) : ""}</div>
             </div>
             ${statusBadge(item.status)}
           </a>`;
-          if (item._type === "feedback")
-            return `
+        if (item._type === "feedback") return `
           <a href="feedback.html" onclick="document.getElementById('searchDropdown').style.display='none'"
              style="display:flex;align-items:center;gap:12px;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--border);cursor:pointer"
              onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
@@ -639,9 +555,8 @@ function renderSearchResults(drop, results, total, q) {
               <div style="font-size:12px;color:var(--text-muted)">${hl(item.recommendation)} · Score: ${item.overall_score}/10</div>
             </div>
           </a>`;
-          return "";
-        })
-        .join("")}`;
+        return "";
+      }).join("")}`;
   };
 
   drop.innerHTML =

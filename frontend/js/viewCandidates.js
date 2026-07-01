@@ -21,10 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   ["positionFilter", "expFilter", "dateFrom", "dateTo"].forEach((id) => {
     const el = document.getElementById(id);
-    if (el)
-      el.addEventListener("change", () =>
-        renderTable(searchInput ? searchInput.value.trim() : ""),
-      );
+    if (el) el.addEventListener("change", () => renderTable(searchInput ? searchInput.value.trim() : ""));
   });
 });
 
@@ -32,9 +29,7 @@ function populatePositionFilter() {
   const sel = document.getElementById("positionFilter");
   if (!sel) return;
   const current = sel.value;
-  const positions = [
-    ...new Set(allCandidates.map((c) => c.position).filter(Boolean)),
-  ].sort();
+  const positions = [...new Set(allCandidates.map((c) => c.position).filter(Boolean))].sort();
   sel.innerHTML =
     `<option value="">All Positions</option>` +
     positions.map((p) => `<option value="${p}">${p}</option>`).join("");
@@ -170,7 +165,7 @@ function renderTable(search = "") {
           <button class="btn btn-icon btn-sm" title="Delete" onclick="deleteCandidate(${c.id},'${c.name}')" style="color:#ef4444" data-roles="admin,hr">
             <i class="fa fa-trash"></i>
           </button>
-          ${c.resume_path ? `<a class="btn btn-icon btn-sm" href="${(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:3000" : "https://ai-interview-pro-mjc7.onrender.com") + `/uploads/${c.resume_path}`}" target="_blank" title="View Resume"><i class="fa fa-file-pdf"></i></a>` : ""}
+          ${c.resume_path ? `<a class="btn btn-icon btn-sm" href="${"https://ai-interview-pro-mjc7.onrender.com" + `/uploads/${c.resume_path}`}" target="_blank" title="View Resume"><i class="fa fa-file-pdf"></i></a>` : ""}
         </div>
       </td>
     </tr>`,
