@@ -66,7 +66,7 @@ function buildSidebar(activePage) {
     { href: "aiScore.html",            icon: "fa-robot",           label: "AI Scoring",            roles: ["admin","hr"] },
     { href: "jdGenerator.html",        icon: "fa-file-pen",        label: "JD Generator",          roles: ["admin","hr"] },
     { href: "interviewQuestions.html", icon: "fa-circle-question", label: "Interview Questions",   roles: ["admin","hr"] },
-    { href: "offerLetter.html",        icon: "fa-file-signature",  label: "Offer Letter",          roles: ["admin","hr"] },
+    { href: "offerletter.html",        icon: "fa-file-signature",  label: "Offer Letter",          roles: ["admin","hr"] },
   ];
   const user = Auth.getUser() || {};
   const role = user.role || "viewer";
